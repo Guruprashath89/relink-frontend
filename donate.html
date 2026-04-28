@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Donate - ReLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #16a34a;
+      --green-light: #22c55e;
+      --surface: #ffffff;
+      --bg: #f0fdf4;
+      --bg-alt: #f7faf8;
+      --border: rgba(0,0,0,0.08);
+      --border-strong: rgba(0,0,0,0.13);
+      --text: #0f172a;
+      --text-2: #374151;
+      --text-3: #6b7280;
+      --text-4: #9ca3af;
+      --nav-h: 68px;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --tr: 0.22s cubic-bezier(.4,0,.2,1);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Figtree', sans-serif; background-color: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+    /* BG BLOBS */
+    .bg-blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(90px); }
+    .blob-1 { width: 560px; height: 560px; background: radial-gradient(circle, rgba(34,197,94,0.12), transparent 70%); top: -160px; right: -80px; animation: fA 20s ease-in-out infinite alternate; }
+    .blob-2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(16,185,129,0.08), transparent 70%); bottom: -80px; left: -80px; animation: fB 26s ease-in-out infinite alternate; }
+    .blob-3 { width: 280px; height: 280px; background: radial-gradient(circle, rgba(59,130,246,0.05), transparent 70%); top: 50%; left: 40%; animation: fC 32s ease-in-out infinite alternate; }
+    @keyframes fA { to { transform: translate(-60px, 80px) scale(1.08); } }
+    @keyframes fB { to { transform: translate(70px, -50px) scale(1.06); } }
+    @keyframes fC { to { transform: translate(-40px, 50px) scale(0.94); } }
+
+    /* NAV */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--nav-h); background: rgba(255,255,255,0.84); backdrop-filter: blur(20px) saturate(1.5); border-bottom: 1px solid var(--border); }
+    .nav-inner { max-width: 1180px; margin: 0 auto; padding: 0 28px; height: 100%; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+    .brand-mark { width: 38px; height: 38px; background: linear-gradient(145deg, #22c55e, #15803d); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; box-shadow: 0 2px 12px rgba(22,163,74,0.28), inset 0 1px 0 rgba(255,255,255,0.2); flex-shrink: 0; }
+    .brand-name { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--text); letter-spacing: -0.025em; }
+    .brand-name span { color: var(--green); }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--text-3); text-decoration: none; padding: 7px 13px; border-radius: 8px; transition: color var(--tr), background var(--tr); }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: rgba(0,0,0,0.04); }
+    .nav-links a.active { color: var(--green); font-weight: 600; }
+    .btn-nav { display: inline-flex; align-items: center; gap: 7px; background: var(--green); color: #fff !important; font-size: 0.8125rem; font-weight: 600; padding: 8px 18px; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; transition: background var(--tr), transform var(--tr), box-shadow var(--tr); box-shadow: 0 1px 4px rgba(22,163,74,0.25); letter-spacing: 0.01em; }
+    .btn-nav:hover { background: #15803d; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(22,163,74,0.35); }
+
+    /* profile dropdown */
+    #profileSection { position: relative; }
+    .profile-icon { font-size: 1.65rem; color: var(--green); cursor: pointer; transition: transform var(--tr); }
+    .profile-icon:hover { transform: scale(1.06); }
+    .dropdown { display: none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); min-width: 170px; box-shadow: 0 8px 30px rgba(0,0,0,0.11); overflow: hidden; }
+    .dropdown.show { display: block; }
+    .dropdown-item { display: block; padding: 9px 16px; font-size: 0.875rem; font-weight: 500; color: var(--text-2); text-decoration: none; background: none; border: none; width: 100%; text-align: left; cursor: pointer; transition: background var(--tr); }
+    .dropdown-item:hover { background: var(--bg-alt); }
+    .dropdown-item.logout { color: #dc2626 !important; border-top: 1px solid var(--border); }
+
+    /* PAGE WRAPPER */
+    .page { position: relative; z-index: 10; padding-top: var(--nav-h); }
+
+    /* HERO STRIP */
+    .hero-strip {
+      background: linear-gradient(160deg, #052e16 0%, #14532d 55%, #166534 100%);
+      padding: 52px 28px 56px;
+      position: relative; overflow: hidden;
+    }
+    .hero-strip::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+    .hero-strip::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(ellipse 55% 60% at 85% 20%, rgba(255,255,255,0.04) 0%, transparent 60%); pointer-events: none; }
+    .hero-inner { max-width: 1180px; margin: 0 auto; position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #86efac; background: rgba(134,239,172,0.1); border: 1px solid rgba(134,239,172,0.2); padding: 5px 13px; border-radius: 100px; margin-bottom: 18px; }
+    .hero-heading { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 2.8vw, 2.6rem); font-weight: 800; line-height: 1.12; color: #fff; letter-spacing: -0.03em; margin-bottom: 14px; }
+    .hero-heading .accent { color: #4ade80; }
+    .hero-desc { font-size: 0.9375rem; font-weight: 300; line-height: 1.75; color: rgba(255,255,255,0.55); margin-bottom: 28px; }
+    .check-list { display: flex; flex-direction: column; gap: 11px; }
+    .check-item { display: flex; align-items: center; gap: 11px; font-size: 0.9rem; color: rgba(255,255,255,0.72); font-weight: 400; }
+    .check-icon { width: 22px; height: 22px; border-radius: 50%; background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.6rem; color: #4ade80; }
+
+    /* mini stats inside hero */
+    .hero-stats { display: flex; gap: 20px; margin-top: 32px; }
+    .hstat { text-align: left; }
+    .hstat-num { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #4ade80; letter-spacing: -0.03em; }
+    .hstat-label { font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.07em; }
+
+    /* FORM CARD inside hero */
+    .form-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 32px 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.06);
+      animation: riseIn 0.55s cubic-bezier(.22,.68,0,1.15) both;
+    }
+    @keyframes riseIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .form-card-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; margin-bottom: 22px; display: flex; align-items: center; gap: 9px; }
+    .form-card-title i { font-size: 0.9rem; color: var(--green); }
+
+    /* FORM FIELDS */
+    .field { margin-bottom: 14px; }
+    label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-2); margin-bottom: 6px; letter-spacing: 0.01em; }
+    label .opt { font-size: 0.72rem; font-weight: 400; color: var(--text-4); }
+    .req-star { color: #ef4444; margin-left: 2px; }
+
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .input-wrap .ii { position: absolute; left: 12px; font-size: 0.78rem; color: var(--text-4); pointer-events: none; transition: color var(--tr); }
+    .input-wrap select,
+    .input-wrap input[type="text"],
+    .input-wrap input[type="number"] {
+      width: 100%; background: var(--surface); border: 1.5px solid var(--border-strong); color: var(--text);
+      font-family: 'Figtree', sans-serif; font-size: 0.9rem; font-weight: 400;
+      padding: 10px 12px 10px 36px; border-radius: var(--radius-sm); outline: none;
+      transition: border-color var(--tr), box-shadow var(--tr); appearance: none;
+    }
+    .input-wrap select { padding-right: 32px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239ca3af' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+    .input-wrap input::placeholder, .input-wrap select option[disabled] { color: var(--text-4); }
+    .input-wrap input:hover, .input-wrap select:hover { border-color: rgba(0,0,0,0.2); }
+    .input-wrap input:focus, .input-wrap select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(22,163,74,0.1); }
+    .input-wrap:focus-within .ii { color: var(--green); }
+
+    /* file input */
+    .file-wrap { border: 1.5px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 16px; text-align: center; cursor: pointer; transition: border-color var(--tr), background var(--tr); position: relative; }
+    .file-wrap:hover { border-color: var(--green); background: rgba(22,163,74,0.03); }
+    .file-wrap input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .file-wrap .file-icon { font-size: 1.4rem; color: var(--text-4); margin-bottom: 6px; }
+    .file-wrap .file-label { font-size: 0.8rem; font-weight: 500; color: var(--text-3); }
+    .file-wrap .file-label span { color: var(--green); font-weight: 600; }
+    .file-hint { font-size: 0.72rem; color: var(--text-4); margin-top: 5px; }
+
+    /* checkbox */
+    .check-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: border-color var(--tr), background var(--tr); }
+    .check-row:hover { border-color: rgba(22,163,74,0.35); background: rgba(22,163,74,0.03); }
+    .check-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--green); cursor: pointer; margin-top: 2px; flex-shrink: 0; }
+    .check-row label { font-size: 0.8125rem; color: var(--text-2); cursor: pointer; margin: 0; font-weight: 400; }
+
+    /* field error */
+    .ferror { font-size: 0.75rem; color: #dc2626; margin-top: 5px; display: none; align-items: center; gap: 5px; }
+    .ferror.show { display: flex; }
+    .ferror i { font-size: 0.7rem; }
+
+    /* submit button */
+    .btn-submit { width: 100%; background: linear-gradient(170deg, #22c55e 0%, #15803d 100%); color: #fff; font-family: 'Syne', sans-serif; font-size: 0.9375rem; font-weight: 700; padding: 13px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; position: relative; overflow: hidden; transition: transform var(--tr), box-shadow var(--tr), opacity var(--tr); letter-spacing: 0.02em; box-shadow: 0 2px 16px rgba(22,163,74,0.26), inset 0 1px 0 rgba(255,255,255,0.16); margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 9px; }
+    .btn-submit::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,0.08), transparent); opacity: 0; transition: opacity var(--tr); }
+    .btn-submit:hover:not(:disabled)::after { opacity: 1; }
+    .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(22,163,74,0.38), inset 0 1px 0 rgba(255,255,255,0.16); }
+    .btn-submit:active:not(:disabled) { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; background: linear-gradient(170deg, #86efac 0%, #4ade80 100%); }
+
+    /* MAIN CONTENT BELOW HERO */
+    .main-content { max-width: 1180px; margin: 0 auto; padding: 56px 28px 80px; }
+
+    /* HOW IT WORKS */
+    .section-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green); background: rgba(22,163,74,0.08); border: 1px solid rgba(22,163,74,0.18); padding: 4px 12px; border-radius: 100px; margin-bottom: 12px; }
+    .section-title { font-family: 'Syne', sans-serif; font-size: clamp(1.4rem, 2vw, 1.9rem); font-weight: 800; color: var(--text); letter-spacing: -0.025em; margin-bottom: 8px; }
+    .section-sub { font-size: 0.9rem; color: var(--text-3); max-width: 480px; }
+
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 36px; }
+    .step-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 22px; position: relative; transition: box-shadow var(--tr), transform var(--tr); }
+    .step-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.08); transform: translateY(-3px); }
+    .step-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: rgba(22,163,74,0.1); line-height: 1; margin-bottom: 14px; letter-spacing: -0.04em; }
+    .step-icon-wrap { width: 40px; height: 40px; background: rgba(22,163,74,0.1); border: 1px solid rgba(22,163,74,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--green); margin-bottom: 14px; }
+    .step-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 7px; }
+    .step-desc { font-size: 0.85rem; color: var(--text-3); line-height: 1.6; }
+
+    /* FOOTER */
+    footer { background: linear-gradient(160deg, #052e16 0%, #0f3d20 100%); color: #fff; padding: 56px 28px 32px; position: relative; overflow: hidden; }
+    footer::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+    .footer-inner { max-width: 1180px; margin: 0 auto; position: relative; z-index: 1; }
+    .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+    .footer-brand-name { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; margin-bottom: 10px; display: flex; align-items: center; gap: 9px; }
+    .footer-brand-name .fmark { width: 30px; height: 30px; background: linear-gradient(145deg, #22c55e, #15803d); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
+    .footer-desc { font-size: 0.85rem; color: rgba(255,255,255,0.42); line-height: 1.7; margin-bottom: 18px; }
+    .social-row { display: flex; gap: 10px; }
+    .social-btn { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); font-size: 0.78rem; text-decoration: none; transition: background var(--tr), color var(--tr), border-color var(--tr); }
+    .social-btn:hover { background: rgba(34,197,94,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
+    .footer-heading { font-family: 'Syne', sans-serif; font-size: 0.875rem; font-weight: 700; color: rgba(255,255,255,0.85); letter-spacing: 0.01em; margin-bottom: 16px; }
+    .footer-links { display: flex; flex-direction: column; gap: 9px; }
+    .footer-links a { font-size: 0.85rem; color: rgba(255,255,255,0.42); text-decoration: none; transition: color var(--tr); }
+    .footer-links a:hover { color: #4ade80; }
+    .footer-links a.active-link { color: #4ade80; font-weight: 600; }
+    .footer-contact p { font-size: 0.85rem; color: rgba(255,255,255,0.42); margin-bottom: 7px; display: flex; align-items: center; gap: 8px; }
+    .footer-contact p i { font-size: 0.75rem; color: #4ade80; width: 14px; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-copy { font-size: 0.78rem; color: rgba(255,255,255,0.3); }
+    .footer-bottom-links { display: flex; gap: 20px; }
+    .footer-bottom-links a { font-size: 0.78rem; color: rgba(255,255,255,0.3); text-decoration: none; transition: color var(--tr); }
+    .footer-bottom-links a:hover { color: rgba(255,255,255,0.6); }
+
+    /* RESPONSIVE */
+    @media (max-width: 960px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-stats { flex-wrap: wrap; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      #nav-links { display: none; }
+      .nav-inner { padding: 0 16px; }
+      .hero-strip { padding: 40px 16px 44px; }
+      .main-content { padding: 40px 16px 60px; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+    }
+    /* TOAST */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 14px 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.13); font-size: 0.875rem; font-family: 'Figtree', sans-serif; color: var(--text-2); min-width: 280px; max-width: 380px; pointer-events: all; animation: toastIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
+    .toast.removing { animation: toastOut 0.25s ease forwards; }
+    .toast-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; flex-shrink: 0; }
+    .toast.success .toast-icon { background: rgba(22,163,74,0.12); color: var(--green); border: 1px solid rgba(22,163,74,0.22); }
+    .toast.error .toast-icon { background: rgba(220,38,38,0.08); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .toast.info .toast-icon { background: rgba(37,99,235,0.08); color: #2563eb; border: 1px solid rgba(37,99,235,0.18); }
+    .toast-msg { flex: 1; line-height: 1.4; }
+    .toast-close { background: none; border: none; cursor: pointer; color: var(--text-4); font-size: 0.75rem; padding: 2px; flex-shrink: 0; }
+    @keyframes toastIn { from { opacity:0; transform:translateY(16px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+    @keyframes toastOut { to { opacity:0; transform:translateY(8px) scale(0.96); } }
+  </style>
+</head>
+<body>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="home.html" class="nav-brand">
+      <div class="brand-mark"><i class="fas fa-leaf"></i></div>
+      <span class="brand-name">Re<span>Link</span></span>
+    </a>
+    <div id="nav-links" class="nav-links">
+      <a href="home.html#how-it-works">How It Works</a>
+      <a href="donate.html" class="active">Donate</a>
+      <a href="receive.html">Receive</a>
+      <a href="home.html#impact">Impact</a>
+      <div id="auth-section">
+        <button onclick="location.href='signup.html'" id="signupButton" class="btn-nav">
+          <i class="fas fa-user-plus" style="font-size:0.7rem;"></i> Sign up
+        </button>
+        <div id="profileSection" class="relative hidden">
+          <i class="fas fa-user-circle profile-icon" onclick="toggleDropdown()" id="profileIcon"></i>
+          <div id="dropdown" class="dropdown">
+            <a href="#" class="dropdown-item" id="usernameDisplay">Username</a>
+            <a href="profile.html"       class="dropdown-item"><i class="fas fa-user"    style="margin-right:8px;width:14px;"></i>My Profile</a>
+            <a href="requests.html"      class="dropdown-item"><i class="fas fa-inbox"   style="margin-right:8px;width:14px;"></i>Requests</a>
+            <a href="notifications.html" class="dropdown-item"><i class="fas fa-bell"    style="margin-right:8px;width:14px;"></i>Notifications</a>
+            <a href="userHistory.html"   class="dropdown-item"><i class="fas fa-history" style="margin-right:8px;width:14px;"></i>My History</a>
+            <button onclick="logout()" class="dropdown-item logout w-full text-left">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO + FORM -->
+  <section class="hero-strip">
+    <div class="hero-inner">
+
+      <!-- LEFT: copy -->
+      <div>
+        <div class="hero-eyebrow"><i class="fas fa-leaf" style="font-size:0.6rem;"></i> Share What You Have</div>
+        <h1 class="hero-heading">Ready to<br><span class="accent">Donate Food?</span></h1>
+        <p class="hero-desc">Fill out the simple form to list your surplus food. We'll connect you with verified recipients in your area instantly.</p>
+        <div class="check-list">
+          <div class="check-item"><div class="check-icon"><i class="fas fa-check"></i></div> Tax-deductible donations</div>
+          <div class="check-item"><div class="check-icon"><i class="fas fa-check"></i></div> Verified NGOs only</div>
+          <div class="check-item"><div class="check-icon"><i class="fas fa-check"></i></div> Real-time tracking</div>
+          <div class="check-item"><div class="check-icon"><i class="fas fa-check"></i></div> Zero platform fees</div>
+        </div>
+        <div class="hero-stats">
+          <div class="hstat"><div class="hstat-num">12K+</div><div class="hstat-label">Members</div></div>
+          <div class="hstat"><div class="hstat-num">48K</div><div class="hstat-label">Items Shared</div></div>
+          <div class="hstat"><div class="hstat-num">98%</div><div class="hstat-label">Satisfaction</div></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: form card -->
+      <div class="form-card">
+        <div class="form-card-title"><i class="fas fa-hand-holding-heart"></i> Donation Details</div>
+
+        <form id="donationForm" novalidate enctype="multipart/form-data">
+
+          <!-- Food Type -->
+          <div class="field">
+            <label for="foodType">Food Type <span class="req-star" id="foodTypeRequired" style="display:none;">*</span></label>
+            <div class="input-wrap">
+              <i class="fas fa-utensils ii"></i>
+              <select id="foodType" name="foodType" required>
+                <option value="" disabled selected>Select food type</option>
+                <option>Prepared Meals</option>
+                <option>Fresh Produce</option>
+                <option>Baked Goods</option>
+                <option>Packaged Food</option>
+                <option>Dairy</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="ferror" id="foodTypeError"><i class="fas fa-circle-exclamation"></i><span>Please select a food type.</span></div>
+          </div>
+
+          <!-- Quantity -->
+          <div class="field">
+            <label for="quantity">Quantity (servings) <span class="req-star" id="quantityRequired" style="display:none;">*</span></label>
+            <div class="input-wrap">
+              <i class="fas fa-layer-group ii"></i>
+              <input type="number" id="quantity" name="quantity" min="1" placeholder="Number of servings" required />
+            </div>
+            <div class="ferror" id="quantityError"><i class="fas fa-circle-exclamation"></i><span>Please enter a valid quantity (at least 1).</span></div>
+          </div>
+
+          <!-- Pickup Location -->
+          <div class="field">
+            <label for="pickupLocation">Pickup Location <span class="req-star" id="pickupLocationRequired" style="display:none;">*</span></label>
+            <div class="input-wrap">
+              <i class="fas fa-location-dot ii"></i>
+              <input type="text" id="pickupLocation" name="pickupLocation" placeholder="Enter address" required />
+            </div>
+            <div class="ferror" id="pickupLocationError"><i class="fas fa-circle-exclamation"></i><span>Please enter a valid pickup location (at least 5 characters).</span></div>
+          </div>
+
+          <!-- Optional Price -->
+          <div class="field">
+            <label for="price">Price <span class="opt">(optional)</span></label>
+            <div class="input-wrap">
+              <i class="fas fa-indian-rupee-sign ii"></i>
+              <input type="number" id="price" name="price" min="0" max="500" step="0.01" placeholder="0.00 (leave blank for free)" oninput="validatePrice(this)" />
+            </div>
+            <div id="priceHint" style="margin-top:6px;font-size:0.78rem;color:var(--text-4);display:flex;align-items:center;gap:5px;">
+              <i class="fas fa-info-circle" style="color:var(--green);font-size:0.72rem;"></i>
+              ReLink policy: free donations encouraged. Max price allowed is <strong style="color:var(--text-2);">₹500</strong>.
+            </div>
+            <div id="priceError" class="ferror" style="display:none;margin-top:6px;">
+              <i class="fas fa-circle-exclamation"></i><span>Price exceeds ₹500 limit. ReLink is for free or low-cost sharing only.</span>
+            </div>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="field">
+            <label for="uploadImage">Upload Image <span class="req-star" id="uploadImageRequired" style="display:none;">*</span></label>
+            <div class="file-wrap">
+              <input type="file" id="uploadImage" name="uploadImage" accept="image/*" required />
+              <div class="file-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+              <div class="file-label"><span>Click to upload</span> or drag & drop</div>
+              <div class="file-hint">JPG, PNG, GIF · Max 5MB</div>
+              <div id="fileName" style="margin-top:8px; font-size:0.8rem; color:#16a34a; display:none;"></div>
+            </div>
+            <div class="ferror" id="uploadImageError"><i class="fas fa-circle-exclamation"></i><span>Please upload an image (required).</span></div>
+          </div>
+
+          <!-- Terms -->
+          <div class="field">
+            <div class="check-row">
+              <input type="checkbox" id="terms" name="terms" required />
+              <label for="terms">I agree to the Food Safety &amp; Quality Terms <span class="req-star" id="termsRequired" style="display:none;">*</span></label>
+            </div>
+            <div class="ferror" id="termsError"><i class="fas fa-circle-exclamation"></i><span>You must agree to the terms and conditions.</span></div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <i class="fas fa-hand-holding-heart" style="font-size:0.85rem;"></i>
+            <span id="btnText">List Donation</span>
+          </button>
+
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <div class="main-content">
+    <div class="section-eyebrow"><i class="fas fa-circle-info" style="font-size:0.6rem;"></i> Simple Process</div>
+    <div class="section-title">How donating works</div>
+    <p class="section-sub">Three easy steps to turn your surplus food into someone's meal.</p>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon-wrap"><i class="fas fa-clipboard-list"></i></div>
+        <div class="step-title">List Your Donation</div>
+        <p class="step-desc">Fill in the form above with food details, quantity, and pickup location. Takes less than 2 minutes.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon-wrap"><i class="fas fa-handshake"></i></div>
+        <div class="step-title">We Find a Match</div>
+        <p class="step-desc">Our platform instantly connects your listing with verified NGOs and recipients near your pickup point.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon-wrap"><i class="fas fa-truck-fast"></i></div>
+        <div class="step-title">Food Gets Collected</div>
+        <p class="step-desc">The recipient collects your donation at the scheduled time. You'll receive a confirmation and impact report.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .page -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name"><div class="fmark"><i class="fas fa-leaf"></i></div> ReLink</div>
+        <p class="footer-desc">Connecting surplus food with those who need it most. Where surplus meets purpose.</p>
+        <div class="social-row">
+          <a href="#" class="social-btn" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-btn" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-btn" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-btn" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Quick Links</div>
+        <div class="footer-links">
+          <a href="home.html#how-it-works">How It Works</a>
+          <a href="donate.html" class="active-link">Donate Food</a>
+          <a href="receive.html">Receive Food</a>
+          <a href="home.html#impact">Impact</a>
+        </div>
+      </div>
+      <div class="footer-contact">
+        <div class="footer-heading">Contact</div>
+        <p><i class="fas fa-envelope"></i> support@relink.org</p>
+        <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+      </div>
+      <div>
+        <div class="footer-heading">Address</div>
+        <p class="footer-desc" style="margin:0;">123 Greenway Blvd<br />Cityville, ST 12345</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2025 ReLink. All rights reserved.</span>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ORIGINAL JS — UNTOUCHED -->
+<script>
+  const BASE_URL = "http://localhost:8080";
+  function updateAuthUI() {
+  const token = localStorage.getItem('jwtToken');
+  const username = localStorage.getItem('username');
+
+  const signupButton = document.getElementById('signupButton');
+  const profileSection = document.getElementById('profileSection');
+  const usernameDisplay = document.getElementById('usernameDisplay');
+
+  if (token && username) {
+    // SHOW profile
+    signupButton.classList.add('hidden');
+    profileSection.classList.remove('hidden');
+
+    usernameDisplay.textContent = username;
+  } else {
+    // SHOW signup
+    signupButton.classList.remove('hidden');
+    profileSection.classList.add('hidden');
+  }
+}
+
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+    updateAuthUI();
+    document.addEventListener('click', function(event) {
+      const dropdown = document.getElementById('dropdown');
+      const profileIcon = document.getElementById('profileIcon');
+      if (!profileIcon.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.classList.remove('show');
+      }
+    });
+  });
+
+  function toggleDropdown() { document.getElementById('dropdown').classList.toggle('show'); }
+
+  function logout() {
+    localStorage.removeItem('jwtToken');
+    localStorage.removeItem('username');
+    document.getElementById('dropdown').classList.remove('show');
+    updateAuthUI();
+  }
+
+  const form = document.getElementById('donationForm');
+  const submitBtn = form.querySelector('button[type="submit"]');
+  submitBtn.disabled = false;
+  document.getElementById('btnText').textContent = 'List Donation';
+
+  function validatePrice(input) {
+    const val = parseFloat(input.value);
+    const errEl = document.getElementById('priceError');
+    if (input.value && (val < 0 || val > 500)) {
+      errEl.style.display = 'flex';
+      errEl.style.alignItems = 'center';
+      errEl.style.gap = '6px';
+      input.style.borderColor = '#dc2626';
+    } else {
+      errEl.style.display = 'none';
+      input.style.borderColor = '';
+    }
+  }
+
+  function validateForm() {
+    let valid = true;
+    const errors = {};
+    const foodType = form.foodType.value.trim();
+    const quantity = parseInt(form.quantity.value);
+    const pickupLocation = form.pickupLocation.value.trim();
+    const terms = form.terms.checked;
+    const uploadImage = form.uploadImage.files[0];
+    if (!foodType || foodType === '') { errors.foodType = 'Please select a food type.'; valid = false; }
+    if (!quantity || quantity < 1 || isNaN(quantity)) { errors.quantity = 'Please enter a valid quantity (at least 1).'; valid = false; }
+    if (!pickupLocation || pickupLocation.length < 5) { errors.pickupLocation = 'Please enter a valid pickup location (at least 5 characters).'; valid = false; }
+    if (!terms) { errors.terms = 'You must agree to the terms and conditions.'; valid = false; }
+    if (!uploadImage) { errors.uploadImage = 'Please upload an image (required).'; valid = false; }
+    else if (uploadImage.size > 5 * 1024 * 1024) { errors.uploadImage = 'Image too large - max 5MB.'; valid = false; }
+    else if (!uploadImage.type.startsWith('image/')) { errors.uploadImage = 'Please upload a valid image file (JPG, PNG, GIF).'; valid = false; }
+    // Price cap validation
+    const priceVal = form.price.value ? parseFloat(form.price.value) : null;
+    if (priceVal !== null && (priceVal < 0 || priceVal > 500)) {
+      document.getElementById('priceError').style.display = 'flex';
+      valid = false;
+    } else {
+      document.getElementById('priceError').style.display = 'none';
+    }
+    const requiredFields = ['foodType', 'quantity', 'pickupLocation', 'terms', 'uploadImage'];
+    requiredFields.forEach(field => {
+      const errorEl = document.getElementById(field + 'Error');
+      const requiredSpan = document.getElementById(field + 'Required');
+      if (errors[field]) {
+        if (errorEl) { errorEl.querySelector('span').textContent = errors[field]; errorEl.classList.add('show'); }
+        if (requiredSpan) requiredSpan.style.display = 'inline';
+      } else {
+        if (errorEl) errorEl.classList.remove('show');
+        if (requiredSpan) requiredSpan.style.display = 'none';
+      }
+    });
+    if (!valid) { submitBtn.disabled = true; document.getElementById('btnText').textContent = 'Complete Form First'; }
+    return valid;
+  }
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const isValid = validateForm();
+    if (!isValid) {
+      const firstError = document.querySelector('#donationForm .ferror.show');
+      if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast('Please fix the highlighted fields before submitting.', 'error');
+      return;
+    }
+    const token = localStorage.getItem('jwtToken');
+    if (!token) { showToast('Please login to donate. Redirecting...', 'error'); setTimeout(() => location.href = 'login.html', 1500); return; }
+    const file = form.uploadImage.files[0];
+    let imageData = null;
+    if (file) {
+      imageData = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => resolve(event.target.result);
+        reader.onerror = () => reject(new Error('Failed to read image file'));
+        reader.readAsDataURL(file);
+      });
+    }
+    const donationData = {
+      foodType: form.foodType.value,
+      quantity: parseInt(form.quantity.value),
+      pickupLocation: form.pickupLocation.value.trim(),
+      price: form.price.value ? parseFloat(form.price.value) : null,
+      image: imageData
+    };
+    try {
+      const response = await fetch(`${BASE_URL}/api/donations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(donationData)
+      });
+      const data = await response.json();
+      if (response.ok) {
+        showToast('🎉 ' + (data.message || 'Donation listed successfully!'), 'success');
+        form.reset();
+        fileNameDisplay.style.display = "none";
+        ['foodType','quantity','pickupLocation','terms','uploadImage'].forEach(field => {
+          const errorEl = document.getElementById(field + 'Error');
+          const requiredSpan = document.getElementById(field + 'Required');
+          if (errorEl) errorEl.classList.remove('show');
+          if (requiredSpan) requiredSpan.style.display = 'none';
+        });
+        submitBtn.disabled = false;
+        document.getElementById('btnText').textContent = 'List Donation';
+      } else if (response.status === 400) {
+        if (data.details && Array.isArray(data.details)) { showToast(data.details.join(' '), 'error'); }
+        else { showToast(data.error || 'Please check your input.', 'error'); }
+        validateForm();
+      } else if (response.status === 401) {
+        showToast('Session expired. Please login again.', 'error');
+        localStorage.removeItem('jwtToken'); localStorage.removeItem('username'); setTimeout(() => location.href = 'login.html', 1500);
+      } else { showToast(data.error || 'Failed to list donation. Try again.', 'error'); }
+    } catch (error) {
+      console.error('API Error:', error);
+      showToast('Network error — ensure server is running.', 'error');
+    }
+  });
+
+
+  const fileInput = document.getElementById('uploadImage');
+const fileNameDisplay = document.getElementById('fileName');
+
+fileInput.addEventListener('change', function () {
+  const file = this.files[0];
+
+  if (file) {
+    fileNameDisplay.textContent = "✅ " + file.name + " uploaded";
+    fileNameDisplay.style.display = "block";
+  } else {
+    fileNameDisplay.style.display = "none";
+  }
+});
+
+function showToast(msg, type = 'info') {
+  const icons = { success: 'fa-check', error: 'fa-circle-exclamation', info: 'fa-circle-info' };
+  const container = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<div class="toast-icon"><i class="fas ${icons[type]||icons.info}"></i></div><span class="toast-msg">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>`;
+  container.appendChild(t);
+  setTimeout(() => { t.classList.add('removing'); setTimeout(() => t.remove(), 260); }, 3800);
+}
+</script>
+</body>
+</html>

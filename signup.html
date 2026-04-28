@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign Up - ReLink</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Figtree:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --green: #16a34a;
+            --green-light: #22c55e;
+            --surface: #ffffff;
+            --bg: #f0fdf4;
+            --bg-alt: #f8fafc;
+            --border: rgba(0,0,0,0.08);
+            --border-strong: rgba(0,0,0,0.13);
+            --text: #0f172a;
+            --text-2: #374151;
+            --text-3: #6b7280;
+            --text-4: #9ca3af;
+            --nav-h: 68px;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --tr: 0.22s cubic-bezier(.4,0,.2,1);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Figtree', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* BG BLOBS */
+        .bg-blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); }
+        .blob-1 { width: 560px; height: 560px; background: radial-gradient(circle, rgba(34,197,94,0.13), transparent 70%); top: -180px; right: -100px; animation: fA 20s ease-in-out infinite alternate; }
+        .blob-2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(16,185,129,0.09), transparent 70%); bottom: -80px; left: -80px; animation: fB 26s ease-in-out infinite alternate; }
+        .blob-3 { width: 280px; height: 280px; background: radial-gradient(circle, rgba(59,130,246,0.06), transparent 70%); top: 45%; left: 35%; animation: fC 32s ease-in-out infinite alternate; }
+        @keyframes fA { to { transform: translate(-60px, 80px) scale(1.08); } }
+        @keyframes fB { to { transform: translate(70px, -50px) scale(1.06); } }
+        @keyframes fC { to { transform: translate(-40px, 50px) scale(0.94); } }
+
+        /* NAV */
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--nav-h); background: rgba(255,255,255,0.84); backdrop-filter: blur(20px) saturate(1.5); border-bottom: 1px solid var(--border); }
+        .nav-inner { max-width: 1180px; margin: 0 auto; padding: 0 28px; height: 100%; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+        .brand-mark { width: 38px; height: 38px; background: linear-gradient(145deg, #22c55e, #15803d); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; box-shadow: 0 2px 12px rgba(22,163,74,0.28), inset 0 1px 0 rgba(255,255,255,0.2); flex-shrink: 0; }
+        .brand-name { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--text); letter-spacing: -0.025em; }
+        .brand-name span { color: var(--green); }
+        .nav-links { display: flex; align-items: center; gap: 4px; }
+        .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--text-3); text-decoration: none; padding: 7px 13px; border-radius: 8px; transition: color var(--tr), background var(--tr); }
+        .nav-links a:hover { color: var(--text); background: rgba(0,0,0,0.04); }
+        .btn-nav { display: inline-flex; align-items: center; gap: 7px; background: var(--green); color: #fff !important; font-size: 0.8125rem; font-weight: 600; padding: 8px 18px; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; transition: background var(--tr), transform var(--tr), box-shadow var(--tr); box-shadow: 0 1px 4px rgba(22,163,74,0.25); letter-spacing: 0.01em; }
+        .btn-nav:hover { background: #15803d; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(22,163,74,0.35); }
+        #profileSection { position: relative; }
+        .profile-icon { font-size: 1.65rem; color: var(--green); cursor: pointer; transition: transform var(--tr); }
+        .profile-icon:hover { transform: scale(1.06); }
+        .dropdown { display: none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); min-width: 170px; box-shadow: 0 8px 30px rgba(0,0,0,0.11); overflow: hidden; }
+        .dropdown.show { display: block; }
+        .dropdown-item { display: block; padding: 9px 16px; font-size: 0.875rem; font-weight: 500; color: var(--text-2); text-decoration: none; background: none; border: none; width: 100%; text-align: left; cursor: pointer; transition: background var(--tr); }
+        .dropdown-item:hover { background: var(--bg-alt); }
+        .logout { color: #dc2626 !important; }
+
+        /* MAIN SPLIT LAYOUT */
+        main { position: relative; z-index: 10; min-height: 100vh; display: grid; grid-template-columns: 1.05fr 1fr; padding-top: var(--nav-h); }
+
+        /* LEFT PANEL */
+        .panel-left { display: flex; flex-direction: column; justify-content: center; padding: 64px 52px 64px 60px; background: linear-gradient(160deg, #052e16 0%, #14532d 55%, #166534 100%); position: relative; overflow: hidden; }
+        .panel-left::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(ellipse 60% 50% at 80% 15%, rgba(255,255,255,0.045) 0%, transparent 60%), radial-gradient(ellipse 40% 60% at 15% 85%, rgba(255,255,255,0.03) 0%, transparent 60%); pointer-events: none; }
+        .panel-left::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+        .left-content { position: relative; z-index: 1; }
+        .left-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #86efac; background: rgba(134,239,172,0.1); border: 1px solid rgba(134,239,172,0.2); padding: 5px 13px; border-radius: 100px; margin-bottom: 22px; }
+        .left-heading { font-family: 'Syne', sans-serif; font-size: clamp(1.9rem, 2.6vw, 2.7rem); font-weight: 800; line-height: 1.12; color: #ffffff; letter-spacing: -0.03em; margin-bottom: 16px; }
+        .left-heading .accent { color: #4ade80; }
+        .left-desc { font-size: 0.9375rem; font-weight: 300; line-height: 1.75; color: rgba(255,255,255,0.52); max-width: 360px; margin-bottom: 40px; }
+        .stats-row { display: flex; gap: 0; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); overflow: hidden; background: rgba(255,255,255,0.04); }
+        .stat { flex: 1; padding: 18px 16px; text-align: center; position: relative; }
+        .stat + .stat::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 1px; background: rgba(255,255,255,0.1); }
+        .stat-num { font-family: 'Syne', sans-serif; font-size: 1.45rem; font-weight: 800; color: #4ade80; letter-spacing: -0.03em; line-height: 1; margin-bottom: 4px; }
+        .stat-label { font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.07em; }
+        .features { margin-top: 34px; display: flex; flex-direction: column; gap: 14px; }
+        .feature-item { display: flex; align-items: flex-start; gap: 12px; }
+        .feature-icon { width: 30px; height: 30px; flex-shrink: 0; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: #4ade80; margin-top: 2px; }
+        .feature-text { font-size: 0.875rem; color: rgba(255,255,255,0.52); line-height: 1.55; }
+        .feature-text strong { color: rgba(255,255,255,0.82); font-weight: 500; }
+
+        /* RIGHT PANEL */
+        .panel-right { display: flex; align-items: center; justify-content: center; padding: 56px 52px; background: #f7faf8; }
+        .signup-box { width: 100%; max-width: 418px; animation: riseIn 0.5s cubic-bezier(.22,.68,0,1.15) both; }
+        @keyframes riseIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
+
+        .box-header { margin-bottom: 28px; }
+        .box-title { font-family: 'Syne', sans-serif; font-size: 1.72rem; font-weight: 800; color: var(--text); letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 5px; }
+        .box-subtitle { font-size: 0.875rem; color: var(--text-3); font-weight: 400; }
+
+        /* Step dots */
+        .step-row { display: flex; align-items: center; margin-bottom: 28px; }
+        .sdot { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; font-family: 'Syne', sans-serif; flex-shrink: 0; }
+        .sdot.active { background: var(--green); color: #fff; box-shadow: 0 0 0 4px rgba(22,163,74,0.14); }
+        .sdot.pend { background: #e2e8f0; color: var(--text-4); }
+        .sline { flex: 1; height: 1.5px; background: #e2e8f0; margin: 0 4px; }
+        .sline.done { background: var(--green-light); }
+
+        /* FORM */
+        .field { margin-bottom: 15px; animation: fIn 0.35s ease both; }
+        .field:nth-child(2) { animation-delay: 0.06s; }
+        .field:nth-child(3) { animation-delay: 0.12s; }
+        .field:nth-child(4) { animation-delay: 0.18s; }
+        @keyframes fIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-2); margin-bottom: 7px; letter-spacing: 0.01em; }
+        .input-wrap { position: relative; display: flex; align-items: center; }
+        .input-wrap .ii { position: absolute; left: 13px; font-size: 0.78rem; color: var(--text-4); pointer-events: none; transition: color var(--tr); }
+        .input-wrap input { width: 100%; background: var(--surface); border: 1.5px solid var(--border-strong); color: var(--text); font-family: 'Figtree', sans-serif; font-size: 0.9375rem; font-weight: 400; padding: 11px 13px 11px 38px; border-radius: var(--radius-sm); outline: none; transition: border-color var(--tr), box-shadow var(--tr); }
+        .input-wrap input::placeholder { color: var(--text-4); }
+        .input-wrap input:hover { border-color: rgba(0,0,0,0.2); }
+        .input-wrap input:focus { border-color: var(--green); box-shadow: 0 0 0 3.5px rgba(22,163,74,0.11); }
+        .input-wrap:focus-within .ii { color: var(--green); }
+        .eye-btn { position: absolute; right: 13px; background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--text-4); padding: 2px; transition: color var(--tr); line-height: 1; }
+        .eye-btn:hover { color: var(--text-2); }
+
+        /* strength */
+        .sw { margin-top: 7px; display: none; align-items: center; gap: 8px; }
+        .sw.vis { display: flex; }
+        .sbars { display: flex; gap: 4px; flex: 1; }
+        .sbar { flex: 1; height: 3px; border-radius: 2px; background: #e2e8f0; transition: background 0.3s; }
+        .sbar.weak { background: #ef4444; }
+        .sbar.fair { background: #f59e0b; }
+        .sbar.good { background: #22c55e; }
+        .sbar.strong { background: #16a34a; }
+        .slbl { font-size: 0.68rem; font-weight: 700; color: var(--text-4); min-width: 40px; text-align: right; letter-spacing: 0.03em; }
+
+        /* alerts */
+        .alert { display: none; align-items: flex-start; gap: 9px; padding: 11px 13px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 500; margin-bottom: 15px; animation: fIn 0.25s ease both; line-height: 1.5; }
+        .alert.show { display: flex; }
+        .alert i { flex-shrink: 0; margin-top: 1px; }
+        .alert-error { background: #fef2f2; border: 1.5px solid #fecaca; color: #b91c1c; }
+        .alert-success { background: #f0fdf4; border: 1.5px solid #bbf7d0; color: #15803d; }
+
+        /* submit */
+        .btn-submit { width: 100%; background: linear-gradient(170deg, #22c55e 0%, #15803d 100%); color: #fff; font-family: 'Syne', sans-serif; font-size: 0.9375rem; font-weight: 700; padding: 13px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; position: relative; overflow: hidden; transition: transform var(--tr), box-shadow var(--tr), opacity var(--tr); letter-spacing: 0.02em; box-shadow: 0 2px 16px rgba(22,163,74,0.26), inset 0 1px 0 rgba(255,255,255,0.16); margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 9px; }
+        .btn-submit::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,0.08), transparent); opacity: 0; transition: opacity var(--tr); }
+        .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(22,163,74,0.38), inset 0 1px 0 rgba(255,255,255,0.16); }
+        .btn-submit:hover:not(:disabled)::after { opacity: 1; }
+        .btn-submit:active:not(:disabled) { transform: translateY(0); }
+        .btn-submit:disabled { opacity: 0.52; cursor: not-allowed; }
+        .bspinner { display: none; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.65s linear infinite; }
+        .bspinner.show { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* bottom */
+        .terms-note { font-size: 0.72rem; color: var(--text-4); text-align: center; margin-top: 12px; line-height: 1.6; }
+        .terms-note a { color: var(--green); text-decoration: none; font-weight: 500; }
+        .terms-note a:hover { text-decoration: underline; }
+        .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0 16px; }
+        .div-line { flex: 1; height: 1px; background: var(--border); }
+        .div-text { font-size: 0.72rem; color: var(--text-4); white-space: nowrap; font-weight: 500; }
+        .login-row { text-align: center; font-size: 0.875rem; color: var(--text-3); }
+        .login-row a { color: var(--green); font-weight: 600; text-decoration: none; }
+        .login-row a:hover { text-decoration: underline; }
+        .trust-row { display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
+        .trust-item { display: flex; align-items: center; gap: 5px; font-size: 0.68rem; font-weight: 600; color: var(--text-4); letter-spacing: 0.04em; text-transform: uppercase; }
+        .trust-item i { font-size: 0.68rem; color: var(--green); }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) { main { grid-template-columns: 1fr; } .panel-left { display: none; } .panel-right { padding: 40px 24px; min-height: calc(100vh - var(--nav-h)); } }
+        @media (max-width: 640px) { #nav-links { display: none; } .nav-inner { padding: 0 16px; } }
+    </style>
+</head>
+<body>
+
+<div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-inner">
+        <a href="home.html" class="nav-brand">
+            <div class="brand-mark"><i class="fas fa-leaf"></i></div>
+            <span class="brand-name">Re<span>Link</span></span>
+        </a>
+        <div id="nav-links" class="nav-links">
+            <a href="home.html">Home</a>
+            <a href="donate.html">Donate</a>
+            <a href="receive.html">Receive</a>
+            <div id="auth-section">
+                <button onclick="location.href='signup.html'" id="signupButton" class="btn-nav">
+                    <i class="fas fa-user-plus" style="font-size:0.7rem;"></i> Sign up
+                </button>
+
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+    <!-- LEFT PANEL -->
+    <div class="panel-left">
+        <div class="left-content">
+            <div class="left-eyebrow"><i class="fas fa-leaf" style="font-size:0.6rem;"></i> Community Platform</div>
+            <h2 class="left-heading">Connect. Share.<br><span class="accent">Make an Impact.</span></h2>
+            <p class="left-desc">ReLink bridges the gap between those who have and those who need — making sustainable sharing effortless and meaningful.</p>
+            <div class="stats-row">
+                <div class="stat"><div class="stat-num">12K+</div><div class="stat-label">Members</div></div>
+                <div class="stat"><div class="stat-num">48K</div><div class="stat-label">Items Shared</div></div>
+                <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Satisfaction</div></div>
+            </div>
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
+                    <div class="feature-text"><strong>Verified community</strong> — every member is reviewed for safety and trust.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="feature-text"><strong>Instant matching</strong> — our algorithm connects donors and receivers in real time.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-earth-asia"></i></div>
+                    <div class="feature-text"><strong>Zero waste mission</strong> — every shared item reduces landfill and carbon emissions.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel-right">
+        <div class="signup-box">
+            <div class="box-header">
+                <h1 class="box-title">Create your account</h1>
+                <p class="box-subtitle">Free forever. No credit card required.</p>
+            </div>
+
+            <div class="step-row">
+                <div class="sdot active">1</div>
+                <div class="sline done"></div>
+                <div class="sdot pend">2</div>
+                <div class="sline"></div>
+                <div class="sdot pend">3</div>
+            </div>
+
+            <form id="signupForm" novalidate>
+                <div id="errorMessage" class="alert alert-error" role="alert">
+                    <i class="fas fa-circle-exclamation"></i>
+                    <span id="errorText"></span>
+                </div>
+                <div id="successMessage" class="alert alert-success" role="alert">
+                    <i class="fas fa-circle-check"></i>
+                    <span>Account created! Redirecting to login…</span>
+                </div>
+
+                <div class="field">
+                    <label for="fullName">Full Name <span style="color:var(--text-4);font-weight:400;font-size:0.72rem;">(used as username)</span></label>
+                    <div class="input-wrap">
+                        <i class="fas fa-user ii"></i>
+                        <input type="text" id="fullName" name="fullName" required minlength="3" maxlength="50" placeholder="e.g., John Doe" autocomplete="name" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-envelope ii"></i>
+                        <input type="email" id="email" name="email" required placeholder="e.g., john@example.com" autocomplete="email" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock ii"></i>
+                        <input type="password" id="password" name="password" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password" oninput="checkStr(this.value)" />
+                        <button type="button" class="eye-btn" onclick="toggleEye()"><i class="fas fa-eye" id="eyeIc"></i></button>
+                    </div>
+                    <div class="sw" id="sw">
+                        <div class="sbars"><div class="sbar" id="s1"></div><div class="sbar" id="s2"></div><div class="sbar" id="s3"></div><div class="sbar" id="s4"></div></div>
+                        <span class="slbl" id="slbl">Weak</span>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-submit">
+                    <div class="bspinner" id="bspinner"></div>
+                    <span id="btnText">Create Account</span>
+                    <i class="fas fa-arrow-right" id="btnArrow" style="font-size:0.72rem;"></i>
+                </button>
+                <p class="terms-note">By signing up you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+            </form>
+
+            <div class="divider"><div class="div-line"></div><span class="div-text">Already have an account?</span><div class="div-line"></div></div>
+            <p class="login-row"><a href="login.html"><i class="fas fa-arrow-right-to-bracket" style="font-size:0.78rem;margin-right:4px;"></i>Log in instead</a></p>
+            <div class="trust-row">
+                <div class="trust-item"><i class="fas fa-lock"></i> SSL Secured</div>
+                <div class="trust-item"><i class="fas fa-shield-halved"></i> GDPR Safe</div>
+                <div class="trust-item"><i class="fas fa-circle-check"></i> Free Forever</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- UI helpers (no backend changes) -->
+<script>
+
+    function checkStr(val) {
+        const sw = document.getElementById('sw');
+        const bars = ['s1','s2','s3','s4'].map(id => document.getElementById(id));
+        const lbl = document.getElementById('slbl');
+        if (!val) { sw.classList.remove('vis'); return; }
+        sw.classList.add('vis');
+        let sc = 0;
+        if (val.length >= 6)  sc++;
+        if (val.length >= 10) sc++;
+        if (/[A-Z]/.test(val) && /[0-9]/.test(val)) sc++;
+        if (/[^A-Za-z0-9]/.test(val)) sc++;
+        const lvl = ['','weak','fair','good','strong'];
+        const lbs = ['','Weak','Fair','Good','Strong'];
+        const col = ['','#ef4444','#f59e0b','#22c55e','#16a34a'];
+        bars.forEach((b, i) => { b.className = 'sbar' + (i < sc ? ' ' + lvl[sc] : ''); });
+        lbl.textContent = lbs[sc] || 'Weak';
+        lbl.style.color = col[sc] || '#9ca3af';
+    }
+    function toggleEye() {
+        const pw = document.getElementById('password');
+        const ic = document.getElementById('eyeIc');
+        if (pw.type === 'password') { pw.type = 'text'; ic.classList.replace('fa-eye','fa-eye-slash'); }
+        else { pw.type = 'password'; ic.classList.replace('fa-eye-slash','fa-eye'); }
+    }
+</script>
+
+<!-- ORIGINAL BACKEND JS — UNTOUCHED -->
+<script>
+    const BASE_URL = "http://localhost:8080";
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('signupForm');
+      const errorDiv = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+      const successDiv = document.getElementById('successMessage');
+      const submitBtn = document.getElementById('submitBtn');
+
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        errorDiv.classList.remove('show');
+        successDiv.classList.remove('show');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating Account...';
+        if (!fullName || fullName.length < 3 || fullName.length > 50) { showError('Full name must be 3-50 characters.'); return; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Please enter a valid email address.'); return; }
+        if (!password || password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+        const payload = { username: fullName, email: email, password: password };
+        try {
+          const response = await fetch(`${BASE_URL}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (response.ok) {
+            successDiv.classList.add('show');
+            setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+          } else {
+            const errorData = await response.text();
+            showError(errorData || 'Registration failed. Please try again.');
+          }
+        } catch (error) {
+          console.error('API Error:', error);
+          showError('Network error. Ensure the server is running.');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign Up';
+        }
+      });
+      function showError(message) { errorText.textContent = message; errorDiv.classList.add('show'); }
+    });
+</script>
+</body>
+</html>

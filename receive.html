@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Receive - ReLink</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --green: #16a34a;
+            --green-light: #22c55e;
+            --surface: #ffffff;
+            --bg: #f0fdf4;
+            --bg-alt: #f7faf8;
+            --border: rgba(0,0,0,0.08);
+            --border-strong: rgba(0,0,0,0.13);
+            --text: #0f172a;
+            --text-2: #374151;
+            --text-3: #6b7280;
+            --text-4: #9ca3af;
+            --nav-h: 68px;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --tr: 0.22s cubic-bezier(.4,0,.2,1);
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Figtree', sans-serif; background-color: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+        /* BG BLOBS */
+        .bg-blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(90px); }
+        .blob-1 { width: 560px; height: 560px; background: radial-gradient(circle, rgba(34,197,94,0.12), transparent 70%); top: -160px; right: -80px; animation: fA 20s ease-in-out infinite alternate; }
+        .blob-2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(16,185,129,0.08), transparent 70%); bottom: -80px; left: -80px; animation: fB 26s ease-in-out infinite alternate; }
+        .blob-3 { width: 280px; height: 280px; background: radial-gradient(circle, rgba(59,130,246,0.05), transparent 70%); top: 50%; left: 40%; animation: fC 32s ease-in-out infinite alternate; }
+        @keyframes fA { to { transform: translate(-60px, 80px) scale(1.08); } }
+        @keyframes fB { to { transform: translate(70px, -50px) scale(1.06); } }
+        @keyframes fC { to { transform: translate(-40px, 50px) scale(0.94); } }
+
+        /* NAV */
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--nav-h); background: rgba(255,255,255,0.84); backdrop-filter: blur(20px) saturate(1.5); border-bottom: 1px solid var(--border); }
+        .nav-inner { max-width: 1180px; margin: 0 auto; padding: 0 28px; height: 100%; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+        .brand-mark { width: 38px; height: 38px; background: linear-gradient(145deg, #22c55e, #15803d); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; box-shadow: 0 2px 12px rgba(22,163,74,0.28), inset 0 1px 0 rgba(255,255,255,0.2); flex-shrink: 0; }
+        .brand-name { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--text); letter-spacing: -0.025em; }
+        .brand-name span { color: var(--green); }
+        .nav-links { display: flex; align-items: center; gap: 4px; }
+        .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--text-3); text-decoration: none; padding: 7px 13px; border-radius: 8px; transition: color var(--tr), background var(--tr); }
+        .nav-links a:hover { color: var(--text); background: rgba(0,0,0,0.04); }
+        .nav-links a.active { color: var(--green); font-weight: 600; background: rgba(22,163,74,0.07); }
+        .btn-nav { display: inline-flex; align-items: center; gap: 7px; background: var(--green); color: #fff !important; font-size: 0.8125rem; font-weight: 600; padding: 8px 18px; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; transition: background var(--tr), transform var(--tr), box-shadow var(--tr); box-shadow: 0 1px 4px rgba(22,163,74,0.25); }
+        .btn-nav:hover { background: #15803d; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(22,163,74,0.35); }
+        #profileSection { position: relative; }
+        .profile-icon { font-size: 1.65rem; color: var(--green); cursor: pointer; transition: transform var(--tr); }
+        .profile-icon:hover { transform: scale(1.06); }
+        .dropdown { display: none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); min-width: 170px; box-shadow: 0 8px 30px rgba(0,0,0,0.11); overflow: hidden; }
+        .dropdown.show { display: block; }
+        .dropdown-item { display: block; padding: 9px 16px; font-size: 0.875rem; font-weight: 500; color: var(--text-2); text-decoration: none; background: none; border: none; width: 100%; text-align: left; cursor: pointer; transition: background var(--tr); }
+        .dropdown-item:hover { background: var(--bg-alt); }
+        .dropdown-item.logout { color: #dc2626 !important; border-top: 1px solid var(--border); }
+
+        /* PAGE */
+        .page { position: relative; z-index: 10; padding-top: var(--nav-h); }
+
+        /* HERO STRIP */
+        .hero-strip { background: linear-gradient(160deg, #052e16 0%, #14532d 55%, #166534 100%); padding: 48px 28px 52px; position: relative; overflow: hidden; }
+        .hero-strip::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+        .hero-strip::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(ellipse 55% 60% at 85% 20%, rgba(255,255,255,0.04) 0%, transparent 60%); pointer-events: none; }
+        .hero-inner { max-width: 1180px; margin: 0 auto; position: relative; z-index: 1; text-align: center; }
+        .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #86efac; background: rgba(134,239,172,0.1); border: 1px solid rgba(134,239,172,0.2); padding: 5px 13px; border-radius: 100px; margin-bottom: 18px; }
+        .hero-heading { font-family: 'Syne', sans-serif; font-size: clamp(1.9rem, 3.2vw, 2.8rem); font-weight: 800; line-height: 1.1; color: #fff; letter-spacing: -0.03em; margin-bottom: 12px; }
+        .hero-heading .accent { color: #4ade80; }
+        .hero-desc { font-size: 1rem; font-weight: 300; color: rgba(255,255,255,0.55); max-width: 480px; margin: 0 auto 32px; }
+
+        /* SEARCH + FILTER BAR */
+        .search-bar-wrap {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 16px 18px;
+            max-width: 860px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+        .search-input-wrap { flex: 1 1 240px; position: relative; display: flex; align-items: center; }
+        .search-input-wrap i { position: absolute; left: 13px; font-size: 0.8rem; color: rgba(255,255,255,0.4); pointer-events: none; }
+        .search-input-wrap input {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border: 1.5px solid rgba(255,255,255,0.15);
+            color: #fff;
+            font-family: 'Figtree', sans-serif;
+            font-size: 0.9rem; font-weight: 400;
+            padding: 10px 12px 10px 36px;
+            border-radius: var(--radius-sm);
+            outline: none;
+            transition: border-color var(--tr), background var(--tr);
+        }
+        .search-input-wrap input::placeholder { color: rgba(255,255,255,0.35); }
+        .search-input-wrap input:focus { border-color: #4ade80; background: rgba(255,255,255,0.14); }
+
+        .filter-select-wrap { position: relative; display: flex; align-items: center; flex: 0 1 180px; }
+        .filter-select-wrap i { position: absolute; left: 11px; font-size: 0.75rem; color: rgba(255,255,255,0.4); pointer-events: none; z-index: 1; }
+        .filter-select {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border: 1.5px solid rgba(255,255,255,0.15);
+            color: #fff;
+            font-family: 'Figtree', sans-serif;
+            font-size: 0.875rem; font-weight: 400;
+            padding: 10px 12px 10px 32px;
+            border-radius: var(--radius-sm);
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            transition: border-color var(--tr), background var(--tr);
+        }
+        .filter-select option { background: #14532d; color: #fff; }
+        .filter-select:focus { border-color: #4ade80; }
+
+        .btn-search {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.875rem; font-weight: 700;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            border: none; cursor: pointer;
+            transition: transform var(--tr), box-shadow var(--tr);
+            box-shadow: 0 2px 12px rgba(22,163,74,0.3);
+            white-space: nowrap;
+        }
+        .btn-search:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(22,163,74,0.45); }
+        .btn-clear { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.65); font-family: 'Figtree', sans-serif; font-size: 0.8125rem; font-weight: 500; padding: 10px 14px; border-radius: var(--radius-sm); cursor: pointer; transition: background var(--tr), color var(--tr); white-space: nowrap; }
+        .btn-clear:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+        /* FILTER CHIPS */
+        .filter-chips { max-width: 860px; margin: 14px auto 0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; font-family: 'Syne', sans-serif; letter-spacing: 0.02em; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.06); transition: all var(--tr); }
+        .chip:hover { border-color: rgba(74,222,128,0.4); color: #86efac; background: rgba(74,222,128,0.08); }
+        .chip.active { background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.45); color: #4ade80; }
+        .chip i { font-size: 0.65rem; }
+
+        /* RESULTS META */
+        .results-meta { max-width: 1180px; margin: 0 auto; padding: 24px 28px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .results-count { font-family: 'Syne', sans-serif; font-size: 0.875rem; font-weight: 700; color: var(--text-2); }
+        .results-count span { color: var(--green); }
+        .sort-wrap { display: flex; align-items: center; gap: 8px; }
+        .sort-label { font-size: 0.8rem; color: var(--text-4); font-weight: 500; }
+        .sort-select { background: var(--surface); border: 1.5px solid var(--border-strong); color: var(--text-2); font-family: 'Figtree', sans-serif; font-size: 0.8rem; padding: 6px 28px 6px 10px; border-radius: 8px; outline: none; appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath fill='%239ca3af' d='M1 1l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
+
+        /* CARDS GRID */
+        .cards-section { max-width: 1180px; margin: 0 auto; padding: 20px 28px 80px; }
+        #donationsContainer { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+
+        /* FOOD CARD */
+        .food-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            transition: transform var(--tr), box-shadow var(--tr), border-color var(--tr);
+            animation: cardIn 0.4s ease both;
+        }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        .food-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); border-color: rgba(22,163,74,0.2); }
+
+        .card-img { width: 100%; height: 180px; object-fit: cover; display: block; }
+        .card-img-placeholder { width: 100%; height: 180px; background: linear-gradient(135deg, #dcfce7, #bbf7d0); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--green); }
+
+        .card-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: var(--green); color: #fff;
+            font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700;
+            padding: 4px 10px; border-radius: 100px;
+            letter-spacing: 0.04em; text-transform: uppercase;
+        }
+        .card-free { background: #0ea5e9; }
+        .card-img-top { position: relative; }
+        .card-badge-wrap { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; }
+
+        .card-body { padding: 18px 18px 14px; flex: 1; display: flex; flex-direction: column; }
+        .card-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 10px; letter-spacing: -0.01em; }
+
+        .card-meta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+        .card-meta-row { display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; color: var(--text-3); }
+        .card-meta-row i { width: 14px; font-size: 0.72rem; color: var(--green); flex-shrink: 0; }
+
+        .card-footer { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border); }
+        .btn-request { width: 100%; background: linear-gradient(170deg, #22c55e 0%, #15803d 100%); color: #fff; font-family: 'Syne', sans-serif; font-size: 0.875rem; font-weight: 700; padding: 11px; border-radius: var(--radius-sm); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: transform var(--tr), box-shadow var(--tr); box-shadow: 0 2px 10px rgba(22,163,74,0.2); letter-spacing: 0.02em; }
+        .btn-request:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(22,163,74,0.38); }
+
+        /* EMPTY / ERROR STATES */
+        .state-box { grid-column: 1 / -1; text-align: center; padding: 64px 24px; }
+        .state-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(22,163,74,0.08); border: 1px solid rgba(22,163,74,0.18); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--green); margin: 0 auto 16px; }
+        .state-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 7px; }
+        .state-desc { font-size: 0.875rem; color: var(--text-3); margin-bottom: 20px; }
+        .btn-state { display: inline-flex; align-items: center; gap: 7px; background: var(--green); color: #fff; font-family: 'Syne', sans-serif; font-size: 0.875rem; font-weight: 700; padding: 10px 22px; border-radius: var(--radius-sm); text-decoration: none; border: none; cursor: pointer; transition: background var(--tr), transform var(--tr); }
+        .btn-state:hover { background: #15803d; transform: translateY(-1px); }
+        .btn-state-outline { background: transparent; border: 1.5px solid var(--border-strong); color: var(--text-3); }
+        .btn-state-outline:hover { background: rgba(0,0,0,0.04); color: var(--text); transform: translateY(-1px); }
+
+        /* LOADING SKELETON */
+        .skeleton { background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+        @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+        .skeleton-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .sk-img { height: 180px; }
+        .sk-body { padding: 18px; }
+        .sk-line { height: 14px; margin-bottom: 10px; }
+        .sk-line.short { width: 60%; }
+        .sk-line.xshort { width: 40%; }
+        .sk-btn { height: 40px; border-radius: var(--radius-sm); margin-top: 14px; }
+
+        /* FOOTER */
+        footer { background: linear-gradient(160deg, #052e16 0%, #0f3d20 100%); color: #fff; padding: 56px 28px 32px; position: relative; overflow: hidden; }
+        footer::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+        .footer-inner { max-width: 1180px; margin: 0 auto; position: relative; z-index: 1; }
+        .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+        .footer-brand-name { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; margin-bottom: 10px; display: flex; align-items: center; gap: 9px; }
+        .footer-brand-name .fmark { width: 30px; height: 30px; background: linear-gradient(145deg, #22c55e, #15803d); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
+        .footer-desc { font-size: 0.85rem; color: rgba(255,255,255,0.42); line-height: 1.7; margin-bottom: 18px; }
+        .social-row { display: flex; gap: 10px; }
+        .social-btn { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); font-size: 0.78rem; text-decoration: none; transition: background var(--tr), color var(--tr), border-color var(--tr); }
+        .social-btn:hover { background: rgba(34,197,94,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
+        .footer-heading { font-family: 'Syne', sans-serif; font-size: 0.875rem; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 16px; }
+        .footer-links { display: flex; flex-direction: column; gap: 9px; }
+        .footer-links a { font-size: 0.85rem; color: rgba(255,255,255,0.42); text-decoration: none; transition: color var(--tr); }
+        .footer-links a:hover { color: #4ade80; }
+        .footer-links a.active-link { color: #4ade80; font-weight: 600; }
+        .footer-contact p { font-size: 0.85rem; color: rgba(255,255,255,0.42); margin-bottom: 7px; display: flex; align-items: center; gap: 8px; }
+        .footer-contact p i { font-size: 0.75rem; color: #4ade80; width: 14px; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; }
+        .footer-copy { font-size: 0.78rem; color: rgba(255,255,255,0.3); }
+        .footer-bottom-links { display: flex; gap: 20px; }
+        .footer-bottom-links a { font-size: 0.78rem; color: rgba(255,255,255,0.3); text-decoration: none; transition: color var(--tr); }
+        .footer-bottom-links a:hover { color: rgba(255,255,255,0.6); }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) { #donationsContainer { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 960px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            #nav-links { display: none; } .nav-inner { padding: 0 16px; }
+            .hero-strip { padding: 36px 16px 40px; }
+            .search-bar-wrap { flex-direction: column; }
+            .filter-select-wrap { flex: 1 1 100%; }
+            .cards-section { padding: 16px 16px 60px; }
+            #donationsContainer { grid-template-columns: 1fr; }
+            .results-meta { padding: 20px 16px 0; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+        }
+    /* TOAST */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 14px 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.13); font-size: 0.875rem; font-family: 'Figtree', sans-serif; color: var(--text-2); min-width: 280px; max-width: 380px; pointer-events: all; animation: toastIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
+    .toast.removing { animation: toastOut 0.25s ease forwards; }
+    .toast-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; flex-shrink: 0; }
+    .toast.success .toast-icon { background: rgba(22,163,74,0.12); color: var(--green); border: 1px solid rgba(22,163,74,0.22); }
+    .toast.error .toast-icon { background: rgba(220,38,38,0.08); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .toast.info .toast-icon { background: rgba(37,99,235,0.08); color: #2563eb; border: 1px solid rgba(37,99,235,0.18); }
+    .toast-msg { flex: 1; line-height: 1.4; }
+    .toast-close { background: none; border: none; cursor: pointer; color: var(--text-4); font-size: 0.75rem; padding: 2px; flex-shrink: 0; }
+    @keyframes toastIn { from { opacity:0; transform:translateY(16px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+    @keyframes toastOut { to { opacity:0; transform:translateY(8px) scale(0.96); } }
+    </style>
+</head>
+<body>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-inner">
+        <a href="home.html" class="nav-brand">
+            <div class="brand-mark"><i class="fas fa-leaf"></i></div>
+            <span class="brand-name">Re<span>Link</span></span>
+        </a>
+        <div id="nav-links" class="nav-links">
+            <a href="home.html#how-it-works">How It Works</a>
+            <a href="donate.html">Donate</a>
+            <a href="receive.html" class="active">Receive</a>
+            <a href="home.html#impact">Impact</a>
+            <div id="auth-section">
+                <button onclick="location.href='signup.html'" id="signupButton" class="btn-nav">
+                    <i class="fas fa-user-plus" style="font-size:0.7rem;"></i> Sign up
+                </button>
+                <div id="profileSection" class="relative hidden">
+                    <i class="fas fa-user-circle profile-icon" onclick="toggleDropdown()" id="profileIcon"></i>
+                    <div id="dropdown" class="dropdown">
+                        <a href="#" class="dropdown-item" id="usernameDisplay">Username</a>
+                        <a href="profile.html"       class="dropdown-item"><i class="fas fa-user"    style="margin-right:8px;width:14px;"></i>My Profile</a>
+                        <a href="requests.html"      class="dropdown-item"><i class="fas fa-inbox"   style="margin-right:8px;width:14px;"></i>Requests</a>
+                        <a href="notifications.html" class="dropdown-item"><i class="fas fa-bell"    style="margin-right:8px;width:14px;"></i>Notifications</a>
+                        <a href="userHistory.html"   class="dropdown-item"><i class="fas fa-history" style="margin-right:8px;width:14px;"></i>My History</a>
+                        <button onclick="logout()" class="dropdown-item logout w-full text-left">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="page">
+
+    <!-- HERO + SEARCH -->
+    <section class="hero-strip">
+        <div class="hero-inner">
+            <div class="hero-eyebrow"><i class="fas fa-location-dot" style="font-size:0.6rem;"></i> Available Near You</div>
+            <h1 class="hero-heading">Find Food<br><span class="accent">Available Nearby</span></h1>
+            <p class="hero-desc">Browse fresh donations ready for pickup in your area. Search, filter, and request in seconds.</p>
+
+            <!-- Search + Filter Bar -->
+            <div class="search-bar-wrap">
+                <div class="search-input-wrap">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="Search by food type, location…" oninput="applyUIFilters()" />
+                </div>
+                <div class="filter-select-wrap">
+                    <i class="fas fa-location-dot"></i>
+                    <select class="filter-select" id="locationFilter" onchange="applyUIFilters()">
+                        <option value="">All Locations</option>
+                        <option>Chennai</option>
+                        <option>Coimbatore</option>
+                        <option>Bangalore</option>
+                        <option>Mumbai</option>
+                        <option>Delhi</option>
+                        <option>Hyderabad</option>
+                        <option>Pune</option>
+                    </select>
+                </div>
+                <div class="filter-select-wrap">
+                    <i class="fas fa-utensils"></i>
+                    <select class="filter-select" id="typeFilter" onchange="applyUIFilters()">
+                        <option value="">All Types</option>
+                        <option>Prepared Meals</option>
+                        <option>Fresh Produce</option>
+                        <option>Baked Goods</option>
+                        <option>Packaged Food</option>
+                        <option>Dairy</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <button class="btn-search" onclick="applyUIFilters()">
+                    <i class="fas fa-magnifying-glass" style="font-size:0.75rem;"></i> Search
+                </button>
+                <button class="btn-clear" onclick="clearFilters()">
+                    <i class="fas fa-xmark" style="font-size:0.75rem;"></i> Clear
+                </button>
+            </div>
+
+            <!-- Quick Filter Chips -->
+            <div class="filter-chips">
+                <div class="chip active" onclick="toggleChip(this, '')" data-type="">
+                    <i class="fas fa-border-all"></i> All
+                </div>
+                <div class="chip" onclick="toggleChip(this, 'Prepared Meals')" data-type="Prepared Meals">
+                    <i class="fas fa-utensils"></i> Prepared Meals
+                </div>
+                <div class="chip" onclick="toggleChip(this, 'Fresh Produce')" data-type="Fresh Produce">
+                    <i class="fas fa-apple-whole"></i> Fresh Produce
+                </div>
+                <div class="chip" onclick="toggleChip(this, 'Baked Goods')" data-type="Baked Goods">
+                    <i class="fas fa-bread-slice"></i> Baked Goods
+                </div>
+                <div class="chip" onclick="toggleChip(this, 'Packaged Food')" data-type="Packaged Food">
+                    <i class="fas fa-box-open"></i> Packaged Food
+                </div>
+                <div class="chip" onclick="toggleChip(this, 'Dairy')" data-type="Dairy">
+                    <i class="fas fa-droplet"></i> Dairy
+                </div>
+                <div class="chip" onclick="toggleChip(this, 'free')" data-type="free">
+                    <i class="fas fa-heart"></i> Free Only
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESULTS META -->
+    <div class="results-meta">
+        <div class="results-count">Showing <span id="resultsCount">0</span> donations</div>
+        <div class="sort-wrap">
+            <span class="sort-label">Sort by</span>
+            <select class="sort-select" id="sortSelect" onchange="applyUIFilters()">
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+                <option value="qty-high">Quantity: High → Low</option>
+                <option value="qty-low">Quantity: Low → High</option>
+                <option value="free">Free first</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- CARDS -->
+    <div class="cards-section">
+        <div id="donationsContainer">
+            <!-- Skeleton loaders shown while loading -->
+            <div class="skeleton-card" id="sk1"><div class="skeleton sk-img"></div><div class="sk-body"><div class="skeleton sk-line"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line xshort"></div><div class="skeleton sk-btn"></div></div></div>
+            <div class="skeleton-card" id="sk2"><div class="skeleton sk-img"></div><div class="sk-body"><div class="skeleton sk-line"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line xshort"></div><div class="skeleton sk-btn"></div></div></div>
+            <div class="skeleton-card" id="sk3"><div class="skeleton sk-img"></div><div class="sk-body"><div class="skeleton sk-line"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line xshort"></div><div class="skeleton sk-btn"></div></div></div>
+        </div>
+    </div>
+
+</div><!-- end .page -->
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand-name"><div class="fmark"><i class="fas fa-leaf"></i></div> ReLink</div>
+                <p class="footer-desc">Connecting surplus food with those who need it most. Where surplus meets purpose.</p>
+                <div class="social-row">
+                    <a href="#" class="social-btn" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-btn" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-btn" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-btn" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div>
+                <div class="footer-heading">Quick Links</div>
+                <div class="footer-links">
+                    <a href="home.html#how-it-works">How It Works</a>
+                    <a href="donate.html">Donate Food</a>
+                    <a href="receive.html" class="active-link">Receive Food</a>
+                    <a href="home.html#impact">Impact</a>
+                </div>
+            </div>
+            <div class="footer-contact">
+                <div class="footer-heading">Contact</div>
+                <p><i class="fas fa-envelope"></i> support@relink.org</p>
+                <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+            </div>
+            <div>
+                <div class="footer-heading">Address</div>
+                <p class="footer-desc" style="margin:0;">123 Greenway Blvd<br />Cityville, ST 12345</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span class="footer-copy">© 2025 ReLink. All rights reserved.</span>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Cookie Policy</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<script>
+    const BASE_URL = "http://localhost:8080";
+  // ── STATE ─────────────────────────────────────────────────
+  let _allDonations   = [];   // donations from API
+  let _myRequests     = {};   // map: donationId → request object
+  let _activeChipType = '';
+  const _token    = localStorage.getItem('jwtToken');
+  const _username = localStorage.getItem('username');
+
+  // ── INIT ──────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    updateAuthUI();
+    document.addEventListener('click', e => {
+      const dd = document.getElementById('dropdown');
+      const ic = document.getElementById('profileIcon');
+      if (ic && dd && !ic.contains(e.target) && !dd.contains(e.target)) dd.classList.remove('show');
+    });
+    loadAll();
+  });
+
+  function updateAuthUI() {
+    const signupButton   = document.getElementById('signupButton');
+    const profileSection = document.getElementById('profileSection');
+    const usernameDisplay = document.getElementById('usernameDisplay');
+    if (_token && _username) {
+      signupButton.classList.add('hidden');
+      profileSection.classList.remove('hidden');
+      if (usernameDisplay) usernameDisplay.textContent = _username;
+    } else {
+      signupButton.classList.remove('hidden');
+      profileSection.classList.add('hidden');
+    }
+  }
+
+  function toggleDropdown() { document.getElementById('dropdown').classList.toggle('show'); }
+  function logout() {
+    localStorage.removeItem('jwtToken'); localStorage.removeItem('username');
+    document.getElementById('dropdown').classList.remove('show');
+    updateAuthUI();
+  }
+
+  // ── LOAD DONATIONS + MY REQUESTS IN PARALLEL ──────────────
+  async function loadAll() {
+    if (!_token) { showLoginPrompt(); return; }
+    try {
+      const [donRes, reqRes] = await Promise.all([
+        fetch(`${BASE_URL}/api/donations`, { headers: { Authorization: 'Bearer ' + _token } }),
+        fetch(`${BASE_URL}/api/requests/mine`, { headers: { Authorization: 'Bearer ' + _token } })
+      ]);
+      if (donRes.status === 401) { localStorage.clear(); location.href = 'login.html'; return; }
+
+      const donData = await donRes.json();
+      const reqData = reqRes.ok ? await reqRes.json() : { requests: [] };
+
+      // Build lookup map: donationId → latest request
+      _myRequests = {};
+      (reqData.requests || []).forEach(r => { _myRequests[r.donationId] = r; });
+
+      const donations = donData.donations || [];
+      _allDonations = donations;
+      if (!donations.length) { renderCards([]); document.getElementById('resultsCount').textContent = '0'; return; }
+      applyUIFilters();
+    } catch (err) { showError(err.message); }
+  }
+
+  // ── FILTER + SORT ─────────────────────────────────────────
+  function toggleChip(el, type) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active'); _activeChipType = type;
+    const tf = document.getElementById('typeFilter');
+    if (type !== 'free') tf.value = type; else tf.value = '';
+    applyUIFilters();
+  }
+
+  function applyUIFilters() {
+    const search   = document.getElementById('searchInput').value.trim().toLowerCase();
+    const location = document.getElementById('locationFilter').value.toLowerCase();
+    const type     = document.getElementById('typeFilter').value.toLowerCase();
+    const sort     = document.getElementById('sortSelect').value;
+    const freeOnly = _activeChipType === 'free';
+    let filtered = _allDonations.filter(d => {
+      const ft = (d.foodType||'').toLowerCase(), loc = (d.pickupLocation||'').toLowerCase();
+      return (!search||ft.includes(search)||loc.includes(search))
+          && (!location||loc.includes(location))
+          && ((!type||type==='free')?true:ft.includes(type))
+          && (!freeOnly||!d.price);
+    });
+    filtered.sort((a,b) => {
+      if (sort==='newest')   return new Date(b.timestamp||0)-new Date(a.timestamp||0);
+      if (sort==='oldest')   return new Date(a.timestamp||0)-new Date(b.timestamp||0);
+      if (sort==='qty-high') return (b.quantity||0)-(a.quantity||0);
+      if (sort==='qty-low')  return (a.quantity||0)-(b.quantity||0);
+      if (sort==='free')     return (a.price?1:0)-(b.price?1:0);
+      return 0;
+    });
+    renderCards(filtered);
+    document.getElementById('resultsCount').textContent = filtered.length;
+  }
+
+  function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('locationFilter').value = '';
+    document.getElementById('typeFilter').value = '';
+    document.getElementById('sortSelect').value = 'newest';
+    _activeChipType = '';
+    document.querySelectorAll('.chip').forEach((c,i)=>c.classList.toggle('active',i===0));
+    applyUIFilters();
+  }
+
+  // ── RENDER CARDS ──────────────────────────────────────────
+  function renderCards(donations) {
+    const container = document.getElementById('donationsContainer');
+    container.innerHTML = '';
+    if (!donations.length) {
+      container.innerHTML = `<div class="state-box"><div class="state-icon"><i class="fas fa-box-open"></i></div><div class="state-title">No donations found</div><p class="state-desc">Try adjusting your search or filters, or check back later.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;"><button class="btn-state btn-state-outline" onclick="clearFilters()"><i class="fas fa-xmark" style="font-size:0.75rem;"></i> Clear Filters</button><a href="donate.html" class="btn-state"><i class="fas fa-hand-holding-heart" style="font-size:0.75rem;"></i> Donate Food</a></div></div>`;
+      return;
+    }
+    donations.forEach((d,i) => { const c = createDonationCard(d); c.style.animationDelay=(i*0.06)+'s'; container.appendChild(c); });
+  }
+
+  // ── BUILD CARD ────────────────────────────────────────────
+  function createDonationCard(donation) {
+    const div = document.createElement('div');
+    div.className = 'food-card';
+
+    // Image
+    let imgHtml = '';
+    if (donation.image && donation.image.startsWith('data:image/')) {
+      imgHtml = `<img src="${donation.image}" alt="${donation.foodType||'Donation'}" class="card-img" onerror="this.style.display='none'" />`;
+    } else {
+      const t = (donation.foodType||'').toLowerCase();
+      let ic = 'fas fa-utensils';
+      if (t.includes('produce')) ic='fas fa-apple-whole';
+      else if (t.includes('baked')||t.includes('goods')) ic='fas fa-bread-slice';
+      else if (t.includes('packaged')) ic='fas fa-box-open';
+      else if (t.includes('dairy')||t.includes('milk')) ic='fas fa-droplet';
+      imgHtml = `<div class="card-img-placeholder"><i class="${ic}"></i></div>`;
+    }
+
+    const isFree = !donation.price || donation.price === 0;
+    const priceHtml = isFree
+      ? `<div class="card-meta-row"><i class="fas fa-heart"></i><span style="color:var(--green);font-weight:600;">Free</span></div>`
+      : `<div class="card-meta-row"><i class="fas fa-indian-rupee-sign"></i><span>&#8377;${parseFloat(donation.price).toFixed(2)}</span></div>`;
+    const dateStr = donation.timestamp ? new Date(donation.timestamp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
+
+    // ── BUTTON STATE based on existing request ──
+    const req = _myRequests[donation.id];
+    let btnHtml = '', extraBadge = '';
+    if (!req) {
+      btnHtml = `<button class="btn-request" onclick="requestPickup(${donation.id},this)"><i class="fas fa-hand-holding-heart" style="font-size:0.8rem;"></i> Request Pickup</button>`;
+    } else if (req.status === 'PENDING') {
+      extraBadge = `<span class="card-badge" style="background:#2563eb;">Pending</span>`;
+      btnHtml = `<button class="btn-request" disabled style="background:linear-gradient(135deg,#2563eb,#1d4ed8);cursor:not-allowed;opacity:0.9;"><i class="fas fa-clock" style="font-size:0.8rem;"></i> Request Pending…</button><p style="font-size:0.72rem;color:#2563eb;margin-top:5px;text-align:center;"><i class="fas fa-info-circle"></i> Waiting for donor to respond</p>`;
+    } else if (req.status === 'ACCEPTED') {
+      extraBadge = `<span class="card-badge" style="background:#15803d;">Accepted ✓</span>`;
+      btnHtml = `<button class="btn-request" disabled style="background:linear-gradient(135deg,#16a34a,#14532d);cursor:not-allowed;"><i class="fas fa-circle-check" style="font-size:0.8rem;"></i> Request Accepted!</button><p style="font-size:0.72rem;color:var(--green);margin-top:5px;text-align:center;font-weight:600;"><i class="fas fa-location-dot"></i> Pickup: ${donation.pickupLocation||'—'}</p>`;
+    } else if (req.status === 'DECLINED') {
+      btnHtml = `<button class="btn-request" onclick="requestPickup(${donation.id},this)" style="background:linear-gradient(135deg,#6b7280,#374151);"><i class="fas fa-redo" style="font-size:0.8rem;"></i> Request Again</button><p style="font-size:0.72rem;color:#dc2626;margin-top:5px;text-align:center;"><i class="fas fa-times-circle"></i> Previous request was declined</p>`;
+    }
+
+    div.innerHTML = `
+      <div class="card-img-top">
+        ${imgHtml}
+        <div class="card-badge-wrap">
+          <span class="card-badge">${donation.foodType||'Donation'}</span>
+          ${isFree?'<span class="card-badge card-free">Free</span>':''}
+          ${extraBadge}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${donation.foodType||'Unknown Type'}</div>
+        <div class="card-meta">
+          <div class="card-meta-row"><i class="fas fa-layer-group"></i><span>${donation.quantity||0} servings</span></div>
+          ${priceHtml}
+          <div class="card-meta-row"><i class="fas fa-location-dot"></i><span>${donation.pickupLocation||'Location N/A'}</span></div>
+          ${dateStr?`<div class="card-meta-row"><i class="fas fa-clock"></i><span>${dateStr}</span></div>`:''}
+          ${donation.donatorUsername?`<div class="card-meta-row"><i class="fas fa-user"></i><span>By ${donation.donatorUsername}</span></div>`:''}
+        </div>
+        <div class="card-footer">${btnHtml}</div>
+      </div>`;
+    return div;
+  }
+
+  // ── REQUEST PICKUP ────────────────────────────────────────
+  async function requestPickup(donationId, btn) {
+    if (!_token) { showToast('Please log in to request a donation.', 'error'); return; }
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size:0.8rem;"></i> Sending…';
+    try {
+      const res  = await fetch(`${BASE_URL}/api/requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + _token },
+        body: JSON.stringify({ donationId, message: '' })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('🎉 Request sent! The donor will be notified.', 'success');
+        _myRequests[donationId] = { donationId, status: 'PENDING', id: data.request?.id };
+        // Re-render button in place
+        const footer = btn.closest('.card-footer');
+        if (footer) {
+          footer.innerHTML = `<button class="btn-request" disabled style="background:linear-gradient(135deg,#2563eb,#1d4ed8);cursor:not-allowed;opacity:0.9;"><i class="fas fa-clock" style="font-size:0.8rem;"></i> Request Pending…</button><p style="font-size:0.72rem;color:#2563eb;margin-top:5px;text-align:center;"><i class="fas fa-info-circle"></i> Waiting for donor to respond</p>`;
+        }
+        // Update badge
+        const wrap = btn.closest('.food-card')?.querySelector('.card-badge-wrap');
+        if (wrap && !wrap.querySelector('.badge-pending-tag')) {
+          const b = document.createElement('span'); b.className='card-badge badge-pending-tag'; b.style.background='#2563eb'; b.textContent='Pending'; wrap.appendChild(b);
+        }
+      } else {
+        showToast(data.error||'Failed to send request.','error');
+        btn.disabled=false; btn.innerHTML='<i class="fas fa-hand-holding-heart" style="font-size:0.8rem;"></i> Request Pickup';
+      }
+    } catch(e) {
+      showToast('Network error. Please try again.','error');
+      btn.disabled=false; btn.innerHTML='<i class="fas fa-hand-holding-heart" style="font-size:0.8rem;"></i> Request Pickup';
+    }
+  }
+
+  // ── STATES ────────────────────────────────────────────────
+  function showLoginPrompt() {
+    document.getElementById('donationsContainer').innerHTML=`<div class="state-box"><div class="state-icon"><i class="fas fa-lock"></i></div><div class="state-title">Login to view donations</div><p class="state-desc">Create a free account or log in to browse and request available donations near you.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;"><a href="login.html" class="btn-state btn-state-outline"><i class="fas fa-arrow-right-to-bracket" style="font-size:0.75rem;"></i> Log In</a><a href="signup.html" class="btn-state"><i class="fas fa-user-plus" style="font-size:0.75rem;"></i> Sign Up Free</a></div></div>`;
+    document.getElementById('resultsCount').textContent='0';
+  }
+  function showError(msg) {
+    document.getElementById('donationsContainer').innerHTML=`<div class="state-box"><div class="state-icon" style="background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.2);color:#dc2626;"><i class="fas fa-triangle-exclamation"></i></div><div class="state-title">Failed to load donations</div><p class="state-desc">${msg}</p><button class="btn-state" onclick="loadAll()"><i class="fas fa-rotate-right" style="font-size:0.75rem;"></i> Retry</button></div>`;
+    document.getElementById('resultsCount').textContent='0';
+  }
+
+  // ── TOAST ─────────────────────────────────────────────────
+  function showToast(msg, type='info') {
+    const icons={success:'fa-check',error:'fa-circle-exclamation',info:'fa-circle-info'};
+    const c=document.getElementById('toastContainer'), t=document.createElement('div');
+    t.className=`toast ${type}`;
+    t.innerHTML=`<div class="toast-icon"><i class="fas ${icons[type]||icons.info}"></i></div><span class="toast-msg">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>`;
+    c.appendChild(t);
+    setTimeout(()=>{t.classList.add('removing');setTimeout(()=>t.remove(),260);},3800);
+  }
+</script>
+</body>
+</html>

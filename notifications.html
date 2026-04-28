@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Notifications - ReLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #16a34a; --green-light: #22c55e;
+      --surface: #ffffff; --bg: #f0fdf4; --bg-alt: #f7faf8;
+      --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.13);
+      --text: #0f172a; --text-2: #374151; --text-3: #6b7280; --text-4: #9ca3af;
+      --nav-h: 68px; --radius: 14px; --radius-sm: 10px;
+      --tr: 0.22s cubic-bezier(.4,0,.2,1);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Figtree', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    .bg-blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(90px); }
+    .blob-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(34,197,94,0.1), transparent 70%); top: -180px; right: -100px; animation: fA 22s ease-in-out infinite alternate; }
+    .blob-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(16,185,129,0.07), transparent 70%); bottom: 20%; left: -100px; animation: fB 28s ease-in-out infinite alternate; }
+    @keyframes fA { to { transform: translate(-80px,100px) scale(1.1); } }
+    @keyframes fB { to { transform: translate(80px,-60px) scale(1.08); } }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--nav-h); background: rgba(255,255,255,0.84); backdrop-filter: blur(20px) saturate(1.5); border-bottom: 1px solid var(--border); transition: background var(--tr), box-shadow var(--tr); }
+    nav.scrolled { background: rgba(255,255,255,0.96); box-shadow: 0 2px 20px rgba(0,0,0,0.06); }
+    .nav-inner { max-width: 1180px; margin: 0 auto; padding: 0 28px; height: 100%; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+    .brand-mark { width: 38px; height: 38px; background: linear-gradient(145deg, #22c55e, #15803d); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; box-shadow: 0 2px 12px rgba(22,163,74,0.28); flex-shrink: 0; }
+    .brand-name { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--text); letter-spacing: -0.025em; }
+    .brand-name span { color: var(--green); }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--text-3); text-decoration: none; padding: 7px 13px; border-radius: 8px; transition: color var(--tr), background var(--tr); }
+    .nav-links a:hover { color: var(--text); background: rgba(0,0,0,0.04); }
+    .nav-links a.active { color: var(--green); font-weight: 600; background: rgba(22,163,74,0.07); }
+    #profileSection { position: relative; }
+    .profile-icon { font-size: 1.65rem; color: var(--green); cursor: pointer; transition: transform var(--tr); }
+    .profile-icon:hover { transform: scale(1.06); }
+    .dropdown { display: none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); min-width: 180px; box-shadow: 0 8px 30px rgba(0,0,0,0.11); overflow: hidden; }
+    .dropdown.show { display: block; }
+    .dropdown-item { display: block; padding: 9px 16px; font-size: 0.875rem; font-weight: 500; color: var(--text-2); text-decoration: none; background: none; border: none; width: 100%; text-align: left; cursor: pointer; transition: background var(--tr); }
+    .dropdown-item:hover { background: var(--bg-alt); }
+    .dropdown-item.logout { color: #dc2626 !important; border-top: 1px solid var(--border); }
+
+    .page { position: relative; z-index: 10; padding-top: var(--nav-h); }
+
+    .hero-strip { background: linear-gradient(160deg, #052e16 0%, #14532d 55%, #166534 100%); padding: 40px 28px 44px; position: relative; overflow: hidden; }
+    .hero-strip::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+    .hero-inner { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #86efac; background: rgba(134,239,172,0.1); border: 1px solid rgba(134,239,172,0.2); padding: 5px 13px; border-radius: 100px; margin-bottom: 12px; }
+    .hero-heading { font-family: 'Syne', sans-serif; font-size: clamp(1.6rem,3vw,2.2rem); font-weight: 800; color: #fff; letter-spacing: -0.03em; }
+    .hero-heading .accent { color: #4ade80; }
+    .hero-desc { font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-top: 6px; }
+    .btn-mark-all { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.85); font-family: 'Syne', sans-serif; font-size: 0.8125rem; font-weight: 600; padding: 10px 18px; border-radius: var(--radius-sm); cursor: pointer; transition: background var(--tr); }
+    .btn-mark-all:hover { background: rgba(255,255,255,0.16); }
+
+    .content-area { max-width: 860px; margin: 0 auto; padding: 32px 28px 60px; }
+
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 100px; font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 600; border: 1.5px solid var(--border-strong); background: var(--surface); color: var(--text-3); cursor: pointer; transition: all var(--tr); }
+    .filter-chip.active { background: var(--green); color: #fff; border-color: var(--green); box-shadow: 0 2px 8px rgba(22,163,74,0.25); }
+    .filter-chip:not(.active):hover { border-color: var(--green); color: var(--green); }
+
+    .notif-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .notif-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; display: flex; align-items: flex-start; gap: 16px; cursor: pointer; transition: box-shadow var(--tr), border-color var(--tr), background var(--tr); animation: cardIn 0.3s ease both; }
+    .notif-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-color: var(--border-strong); }
+    .notif-card.unread { border-left: 3px solid var(--green); background: rgba(22,163,74,0.02); }
+    @keyframes cardIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    .notif-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .ni-green { background: rgba(22,163,74,0.1); color: var(--green); border: 1px solid rgba(22,163,74,0.18); }
+    .ni-blue { background: rgba(37,99,235,0.08); color: #2563eb; border: 1px solid rgba(37,99,235,0.15); }
+    .ni-amber { background: rgba(217,119,6,0.08); color: #d97706; border: 1px solid rgba(217,119,6,0.15); }
+    .ni-red { background: rgba(220,38,38,0.08); color: #dc2626; border: 1px solid rgba(220,38,38,0.18); }
+    .ni-purple { background: rgba(124,58,237,0.08); color: #7c3aed; border: 1px solid rgba(124,58,237,0.15); }
+
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-title { font-family: 'Syne', sans-serif; font-size: 0.875rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .notif-msg { font-size: 0.85rem; color: var(--text-3); line-height: 1.5; }
+    .notif-time { font-size: 0.75rem; color: var(--text-4); margin-top: 6px; }
+
+    .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; margin-top: 6px; }
+
+    .empty-state { padding: 64px 20px; text-align: center; }
+    .empty-icon { width: 64px; height: 64px; border-radius: 16px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-4); margin: 0 auto 16px; }
+    .empty-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .empty-desc { font-size: 0.875rem; color: var(--text-4); max-width: 260px; margin: 0 auto; }
+
+    .skel { height: 14px; border-radius: 6px; background: linear-gradient(90deg, #f0fdf4 25%, #dcfce7 50%, #f0fdf4 75%); background-size: 200% 100%; animation: skelShimmer 1.4s ease infinite; }
+    @keyframes skelShimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+    .skel-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; display: flex; gap: 16px; }
+    .skel-icon { width: 44px; height: 44px; border-radius: 12px; background: #f0fdf4; flex-shrink: 0; }
+
+    @media (max-width: 640px) {
+      .hero-strip { padding: 32px 16px 36px; }
+      .content-area { padding: 20px 16px 48px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
+
+<nav id="mainNav">
+  <div class="nav-inner">
+    <a href="home.html" class="nav-brand">
+      <div class="brand-mark"><i class="fas fa-leaf"></i></div>
+      <span class="brand-name">Re<span>Link</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="home.html">Home</a>
+      <a href="donate.html">Donate</a>
+      <a href="receive.html">Receive</a>
+      <a href="notifications.html" class="active">Notifications</a>
+    </div>
+    <div id="profileSection">
+      <i class="fas fa-user-circle profile-icon" onclick="toggleDropdown()" id="profileIcon"></i>
+      <div id="dropdown" class="dropdown">
+        <a href="#" class="dropdown-item" id="usernameDisplay">Username</a>
+        <a href="profile.html" class="dropdown-item"><i class="fas fa-user" style="margin-right:8px;width:14px;"></i>My Profile</a>
+        <a href="requests.html" class="dropdown-item"><i class="fas fa-inbox" style="margin-right:8px;width:14px;"></i>Requests</a>
+        <a href="notifications.html" class="dropdown-item"><i class="fas fa-bell" style="margin-right:8px;width:14px;"></i>Notifications</a>
+        <a href="userHistory.html" class="dropdown-item"><i class="fas fa-history" style="margin-right:8px;width:14px;"></i>My History</a>
+        <button onclick="logout()" class="dropdown-item logout">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="hero-strip">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-eyebrow"><i class="fas fa-bell"></i> Inbox</div>
+        <h1 class="hero-heading">Your <span class="accent">Notifications</span></h1>
+        <p class="hero-desc"><span id="unreadSummary">Loading…</span></p>
+      </div>
+      <button class="btn-mark-all" onclick="markAllRead()">
+        <i class="fas fa-check-double"></i> Mark all as read
+      </button>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <div class="filter-bar">
+      <button class="filter-chip active" onclick="setFilter('all', this)"><i class="fas fa-border-all"></i> All</button>
+      <button class="filter-chip" onclick="setFilter('unread', this)"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Unread</button>
+      <button class="filter-chip" onclick="setFilter('REQUEST_RECEIVED', this)"><i class="fas fa-inbox"></i> Requests</button>
+      <button class="filter-chip" onclick="setFilter('REQUEST_ACCEPTED', this)"><i class="fas fa-check"></i> Accepted</button>
+      <button class="filter-chip" onclick="setFilter('DONATION_COMPLETED', this)"><i class="fas fa-circle-check"></i> Completed</button>
+      <button class="filter-chip" onclick="setFilter('RATING_RECEIVED', this)"><i class="fas fa-star"></i> Ratings</button>
+    </div>
+
+    <div class="notif-list" id="notifList">
+      <!-- Skeleton -->
+      <div class="skel-card"><div class="skel-icon"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;"><div class="skel" style="width:50%"></div><div class="skel" style="width:80%"></div><div class="skel" style="width:30%"></div></div></div>
+      <div class="skel-card"><div class="skel-icon"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;"><div class="skel" style="width:60%"></div><div class="skel" style="width:70%"></div><div class="skel" style="width:25%"></div></div></div>
+      <div class="skel-card"><div class="skel-icon"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;"><div class="skel" style="width:45%"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:28%"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BASE_URL = "http://localhost:8080";
+  const token = localStorage.getItem('jwtToken');
+  const username = localStorage.getItem('username');
+  if (!token) { alert('Please log in first.'); window.location.href = 'login.html'; }
+  if (username) document.getElementById('usernameDisplay').textContent = username;
+
+  window.addEventListener('scroll', () => {
+    document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 20);
+  });
+  document.addEventListener('click', e => {
+    const dd = document.getElementById('dropdown'), ic = document.getElementById('profileIcon');
+    if (!ic.contains(e.target) && !dd.contains(e.target)) dd.classList.remove('show');
+  });
+  function toggleDropdown() { document.getElementById('dropdown').classList.toggle('show'); }
+  function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+  let allNotifications = [];
+  let currentFilter = 'all';
+
+  const typeConfig = {
+    REQUEST_RECEIVED:   { icon: 'fa-inbox',        cls: 'ni-blue',   label: 'Request Received' },
+    REQUEST_ACCEPTED:   { icon: 'fa-circle-check',  cls: 'ni-green',  label: 'Request Accepted' },
+    REQUEST_DECLINED:   { icon: 'fa-circle-xmark',  cls: 'ni-red',    label: 'Request Declined' },
+    DONATION_COMPLETED: { icon: 'fa-check-double',  cls: 'ni-blue',   label: 'Completed' },
+    ACCOUNT_BLOCKED:    { icon: 'fa-ban',           cls: 'ni-red',    label: 'Account' },
+    RATING_RECEIVED:    { icon: 'fa-star',          cls: 'ni-amber',  label: 'Rating' },
+    GENERAL:            { icon: 'fa-bell',          cls: 'ni-purple', label: 'General' },
+  };
+
+  async function loadNotifications() {
+    try {
+      const res = await fetch(`${BASE_URL}/api/notifications`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 401) { localStorage.clear(); window.location.href = 'login.html'; return; }
+      const data = await res.json();
+      allNotifications = data.notifications || [];
+      const unread = data.unreadCount || 0;
+      document.getElementById('unreadSummary').textContent =
+        unread > 0 ? `${unread} unread notification${unread !== 1 ? 's' : ''}` : 'All caught up!';
+      render();
+    } catch (e) {
+      document.getElementById('notifList').innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fas fa-wifi-slash"></i></div><div class="empty-title">Failed to load</div><div class="empty-desc">Check your connection and try again.</div></div>`;
+    }
+  }
+
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function render() {
+    let list = allNotifications;
+    if (currentFilter === 'unread') list = list.filter(n => !n.isRead);
+    else if (currentFilter !== 'all') list = list.filter(n => n.type === currentFilter);
+
+    const container = document.getElementById('notifList');
+    if (!list.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fas fa-bell-slash"></i></div><div class="empty-title">No notifications</div><div class="empty-desc">${currentFilter === 'unread' ? "You're all caught up!" : 'Nothing here yet.'}</div></div>`;
+      return;
+    }
+
+    container.innerHTML = list.map((n, i) => {
+      const cfg = typeConfig[n.type] || typeConfig.GENERAL;
+      const timeAgo = formatTime(n.createdAt);
+      return `<div class="notif-card ${n.isRead ? '' : 'unread'}" style="animation-delay:${i*0.04}s" onclick="markRead(${n.id}, this)">
+        <div class="notif-icon ${cfg.cls}"><i class="fas ${cfg.icon}"></i></div>
+        <div class="notif-body">
+          <div class="notif-title">${h(n.title)}</div>
+          <div class="notif-msg">${h(n.message)}</div>
+          <div class="notif-time"><i class="fas fa-clock" style="font-size:0.65rem;margin-right:4px;"></i>${timeAgo}</div>
+        </div>
+        ${!n.isRead ? '<div class="unread-dot"></div>' : ''}
+      </div>`;
+    }).join('');
+  }
+
+  async function markRead(id, card) {
+    const notif = allNotifications.find(n => n.id === id);
+    if (notif && !notif.isRead) {
+      notif.isRead = true;
+      card.classList.remove('unread');
+      const dot = card.querySelector('.unread-dot');
+      if (dot) dot.remove();
+      fetch(`${BASE_URL}/api/notifications/${id}/read`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
+      const unread = allNotifications.filter(n => !n.isRead).length;
+      document.getElementById('unreadSummary').textContent =
+        unread > 0 ? `${unread} unread notification${unread !== 1 ? 's' : ''}` : 'All caught up!';
+    }
+  }
+
+  async function markAllRead() {
+    try {
+      await fetch(`${BASE_URL}/api/notifications/mark-all-read`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      allNotifications.forEach(n => n.isRead = true);
+      document.getElementById('unreadSummary').textContent = 'All caught up!';
+      render();
+    } catch (e) {}
+  }
+
+  function formatTime(ts) {
+    if (!ts) return '';
+    const diff = Date.now() - new Date(ts).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+  }
+
+  function h(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  loadNotifications();
+</script>
+</body>
+</html>

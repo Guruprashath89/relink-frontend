@@ -599,6 +599,7 @@
 
 <!-- ORIGINAL JS — UNTOUCHED -->
 <script>
+    const BASE_URL = "https://relink-backend-uf4b.onrender.com";
     document.addEventListener('DOMContentLoaded', function() {
       const token = localStorage.getItem('jwtToken');
       const username = localStorage.getItem('username');
@@ -611,7 +612,7 @@
         profileSection.classList.remove('hidden');
         usernameDisplay.textContent = username;
         // Fetch unread notification count
-        fetch('/api/notifications/unread-count', { headers: { 'Authorization': 'Bearer ' + token } })
+        fetch(`${BASE_URL}/api/notifications/unread-count`, { headers: { 'Authorization': 'Bearer ' + token } })
           .then(r => r.json()).then(d => {
             if (d.unreadCount > 0) {
               const badge = document.getElementById('navNotifBadge');

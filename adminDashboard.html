@@ -389,7 +389,7 @@
 
   if (!token) {
     showAlert('No token found. Please log in again.', 'error');
-    setTimeout(() => window.location.href = 'login.html', 2000);
+    setTimeout(() => window.location.href = '/login.html', 2000);
   }
 
   document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -397,7 +397,7 @@
     localStorage.removeItem('username');
     localStorage.removeItem('role');
     showAlert('Logged out successfully.', 'success');
-    setTimeout(() => window.location.href = 'login.html', 1500);
+    setTimeout(() => window.location.href = '/login.html', 1500);
   });
 
   async function loadDashboard() {
@@ -413,7 +413,7 @@
         updateStats(data.users, data.donations);
       } else {
         showAlert('Failed to load dashboard: ' + response.status, 'error');
-        setTimeout(() => window.location.href = 'login.html', 2000);
+        setTimeout(() => window.location.href = '/login.html', 2000);
       }
     } catch (err) {
       showAlert('Error loading dashboard: ' + err.message, 'error');

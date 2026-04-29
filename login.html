@@ -336,10 +336,10 @@
             setTimeout(() => {
               if (data.role === 'ADMIN' || data.role === 'Admin' || data.role === 'admin') {
                 console.log('Redirecting admin to /admin/dashboard');
-                window.location.href = 'adminDashboard.html';
+                window.location.href = '/adminDashboard.html';
               } else {
                 console.log('Redirecting user to home.html');
-                window.location.href = 'home.html';
+                window.location.href = '/home.html';
               }
             }, 1500);
           } else {

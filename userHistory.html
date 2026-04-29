@@ -304,7 +304,7 @@
   const BASE_URL = "https://relink-backend-uf4b.onrender.com";
   const token = localStorage.getItem('jwtToken');
   const username = localStorage.getItem('username');
-  if (!token) { alert('Please log in first.'); window.location.href = 'login.html'; }
+  if (!token) { alert('Please log in first.'); window.location.href = '/login.html'; }
   if (username) document.getElementById('usernameDisplay').textContent = username;
 
   window.addEventListener('scroll', () => {
@@ -315,7 +315,7 @@
     if (!ic.contains(e.target) && !dd.contains(e.target)) dd.classList.remove('show');
   });
   function toggleDropdown() { document.getElementById('dropdown').classList.toggle('show'); }
-  function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+  function logout() { localStorage.clear(); window.location.href = '/login.html'; }
 
   let allDonated = [], allReceived = [], currentTab = 'donated';
 

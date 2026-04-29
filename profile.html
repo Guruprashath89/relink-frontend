@@ -245,7 +245,7 @@
   const BASE_URL = "https://relink-backend-uf4b.onrender.com";
   const token = localStorage.getItem('jwtToken');
   const loggedUsername = localStorage.getItem('username');
-  if (!token) { alert('Please log in first.'); window.location.href = 'login.html'; }
+  if (!token) { alert('Please log in first.'); window.location.href = '/login.html'; }
   if (loggedUsername) document.getElementById('usernameDisplay').textContent = loggedUsername;
 
   window.addEventListener('scroll', () => {
@@ -256,7 +256,7 @@
     if (!ic.contains(e.target) && !dd.contains(e.target)) dd.classList.remove('show');
   });
   function toggleDropdown() { document.getElementById('dropdown').classList.toggle('show'); }
-  function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+  function logout() { localStorage.clear(); window.location.href = '/login.html'; }
   function scrollToEdit() { document.getElementById('editSection').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 
   let profileData = null;
@@ -264,7 +264,7 @@
   async function loadProfile() {
     try {
       const res = await fetch(`${BASE_URL}/api/profile/me`, { headers: { Authorization: `Bearer ${token}` } });
-      if (res.status === 401) { localStorage.clear(); window.location.href = 'login.html'; return; }
+      if (res.status === 401) { localStorage.clear(); window.location.href = '/login.html'; return; }
       profileData = await res.json();
       renderProfile(profileData);
     } catch (e) {

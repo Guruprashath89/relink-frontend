@@ -191,7 +191,7 @@
             <a href="donate.html">Donate</a>
             <a href="receive.html">Receive</a>
             <div id="auth-section">
-                <button onclick="location.href='signup.html'" id="signupButton" class="btn-nav">
+                <button onclick="location.href='/signup.html'" id="signupButton" class="btn-nav">
                     <i class="fas fa-user-plus" style="font-size:0.7rem;"></i> Sign up
                 </button>
 
@@ -364,7 +364,7 @@
           });
           if (response.ok) {
             successDiv.classList.add('show');
-            setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+            setTimeout(() => { window.location.href = '/login.html'; }, 1500);
           } else {
             const errorData = await response.text();
             showError(errorData || 'Registration failed. Please try again.');

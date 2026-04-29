@@ -609,7 +609,7 @@
         validateForm();
       } else if (response.status === 401) {
         showToast('Session expired. Please login again.', 'error');
-        localStorage.removeItem('jwtToken'); localStorage.removeItem('username'); setTimeout(() => location.href = 'login.html', 1500);
+        localStorage.removeItem('jwtToken'); localStorage.removeItem('username'); setTimeout(() => location.href = '/login.html', 1500);
       } else { showToast(data.error || 'Failed to list donation. Try again.', 'error'); }
     } catch (error) {
       console.error('API Error:', error);

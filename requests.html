@@ -301,7 +301,7 @@
     if (!ic.contains(e.target) && !dd.contains(e.target)) dd.classList.remove('show');
   });
   function toggleDropdown() { document.getElementById('dropdown').classList.toggle('show'); }
-  function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+  function logout() { localStorage.clear(); window.location.href = '/login.html'; }
 
   // ── DATA ──────────────────────────────────────────────────
   let incomingRequests = [];
@@ -314,7 +314,7 @@
         fetch(`${BASE_URL}/api/requests/incoming`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${BASE_URL}/api/requests/mine`,     { headers: { Authorization: `Bearer ${token}` } })
       ]);
-      if (inRes.status === 401) { localStorage.clear(); window.location.href = 'login.html'; return; }
+      if (inRes.status === 401) { localStorage.clear(); window.location.href = '/login.html'; return; }
 
       const inData = await inRes.json();
       const myData = await myRes.json();

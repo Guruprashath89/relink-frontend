@@ -96,11 +96,241 @@
     .skel-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; display: flex; gap: 16px; }
     .skel-icon { width: 44px; height: 44px; border-radius: 12px; background: #f0fdf4; flex-shrink: 0; }
 
-    @media (max-width: 640px) {
-      .hero-strip { padding: 32px 16px 36px; }
-      .content-area { padding: 20px 16px 48px; }
-      .nav-links { display: none; }
-    }
+//media queries
+
+   /* TABLET */
+@media (max-width: 900px) {
+
+  .nav-inner {
+    padding: 0 20px;
+  }
+
+  .hero-strip {
+    padding: 36px 22px 40px;
+  }
+
+  .content-area {
+    padding: 28px 22px 52px;
+  }
+
+  .notif-card {
+    padding: 16px 18px;
+  }
+}
+
+
+/* MOBILE */
+@media (max-width: 640px) {
+
+  body {
+    overflow-x: hidden;
+  }
+
+  nav {
+    height: auto;
+    min-height: var(--nav-h);
+  }
+
+  .nav-inner {
+    padding: 14px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .nav-links {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .nav-links a {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  .page {
+    padding-top: 120px;
+  }
+
+  .hero-strip {
+    padding: 28px 16px 32px;
+  }
+
+  .hero-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .hero-heading {
+    font-size: 1.7rem;
+    line-height: 1.1;
+  }
+
+  .hero-desc {
+    font-size: 0.82rem;
+    margin-top: 4px;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.62rem;
+    padding: 4px 10px;
+  }
+
+  .btn-mark-all {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.76rem;
+    padding: 11px 14px;
+  }
+
+  .content-area {
+    padding: 18px 14px 46px;
+  }
+
+  .filter-bar {
+    gap: 8px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    padding: 7px 13px;
+  }
+
+  .notif-list {
+    gap: 12px;
+  }
+
+  .notif-card {
+    padding: 14px;
+    gap: 12px;
+    border-radius: 16px;
+  }
+
+  .notif-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 0.88rem;
+    border-radius: 10px;
+  }
+
+  .notif-title {
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+
+  .notif-msg {
+    font-size: 0.78rem;
+    line-height: 1.55;
+  }
+
+  .notif-time {
+    font-size: 0.68rem;
+  }
+
+  .unread-dot {
+    width: 7px;
+    height: 7px;
+    margin-top: 5px;
+  }
+
+  .dropdown {
+    right: -6px;
+    min-width: 165px;
+  }
+
+  .dropdown-item {
+    font-size: 0.8rem;
+    padding: 10px 14px;
+  }
+
+  .empty-state {
+    padding: 48px 14px;
+  }
+
+  .empty-title {
+    font-size: 0.92rem;
+  }
+
+  .empty-desc {
+    font-size: 0.8rem;
+  }
+
+  .skel-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .skel-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .bg-blobs {
+    opacity: 0.7;
+  }
+}
+
+
+/* EXTRA SMALL DEVICES */
+@media (max-width: 400px) {
+
+  .brand-name {
+    font-size: 1.05rem;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .hero-heading {
+    font-size: 1.45rem;
+  }
+
+  .hero-desc {
+    font-size: 0.76rem;
+  }
+
+  .btn-mark-all {
+    font-size: 0.72rem;
+    padding: 10px 12px;
+  }
+
+  .filter-chip {
+    font-size: 0.68rem;
+    padding: 6px 11px;
+  }
+
+  .notif-title {
+    font-size: 0.76rem;
+  }
+
+  .notif-msg {
+    font-size: 0.74rem;
+  }
+
+  .notif-time {
+    font-size: 0.64rem;
+  }
+
+  .nav-links a {
+    font-size: 0.7rem;
+    padding: 5px 8px;
+  }
+}
   </style>
 </head>
 <body>
